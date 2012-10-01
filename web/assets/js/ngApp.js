@@ -1,4 +1,4 @@
-angular.module('gambit', [], function($routeProvider, $locationProvider) {
+var gambitModule = angular.module('gambit', [], function($routeProvider, $locationProvider) {
 
     $routeProvider.when('/', {
         templateUrl: 'ng/home.html',
@@ -17,48 +17,53 @@ angular.module('gambit', [], function($routeProvider, $locationProvider) {
      
     // configure html5 to get links working on jsfiddle
     $locationProvider.html5Mode(true);
-    }).directive('tabs', function() {
-    return {
-      restrict: 'E', // is html tag
-      transclude: true, // has inner content
-      templateUrl: 'ng/directives/tabs.html',        
-      replace: true,
-      scope: {},
-      controller: function($scope, $element) {
-            var panes = $scope.panes = [];
-     
-            $scope.select = function(pane) {
-              angular.forEach(panes, function(pane) {
-                pane.selected = false;
-              });
-              pane.selected = true;
-            }
-     
-            this.addTab = function(pane) {
-                if (panes.length == 0) {
-                    $scope.select(pane);
+    });
+
+    gambitModule.directive('tabs', function() {
+        return {
+            restrict: 'E', // is html tag
+            transclude: true, // has inner content
+            templateUrl: 'ng/directives/tabs.html',        
+            replace: true,
+            scope: {},
+            controller: function($scope, $element) {
+                var panes = $scope.panes = [];
+             
+                $scope.select = function(pane) {
+                    angular.forEach(panes, function(pane) { pane.selected = false; });
+                    pane.selected = true;
                 }
-                panes.push(pane);
+             
+                this.addTab = function(pane) {
+                    if (panes.length == 0) {
+                        $scope.select(pane);
+                    }
+                    panes.push(pane);
+                }
+
+                this.select = $scope.select;
             }
-      }
-    };
-  }).
-    directive('tab', function() {
+        };
+    });
+
+    gambitModule.directive('tab', function() {
         return {
             require: '^tabs',
             restrict: 'E',
+            selected: false,
             scope: { title: '@', target: '@' },
-            link: function(scope, element, attrs, tabsCtrl) {
-              tabsCtrl.addTab(scope);
+            link: function($scope, element, attrs, tabsCtrl) {
+                tabsCtrl.addTab($scope);
+                $scope.select = tabsCtrl.select;
             },
-            template: '<li ng-class="{active:selected}"><a href="{{target}}">{{title}}</a></li>',
+            template: '<li ng-class="{active:selected}"><a href="{{target}}" ng-click="select(this)">{{title}}</a></li>',
             replace: true
         };
     });
 
     function HomeCntl($scope, $route, $routeParams, $location) {
     	$scope.$route = $route;
-    	$scope.$location = $location;
+        $scope.$location = $location;
     	$scope.$routeParams = $routeParams;
     }
      
