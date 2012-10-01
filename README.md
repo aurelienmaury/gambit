@@ -1,4 +1,4 @@
 gambit
 ======
 
-Vert.x + AngularJS demo application
+Vert.x + AngularJS demo application.
