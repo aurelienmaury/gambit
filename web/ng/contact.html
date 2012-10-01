@@ -1,5 +1,11 @@
- <h1>Contact</h1>
+<h1>Contact</h1>
  
- <p>
+<p>
  	Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.
- </p>
+</p>
+
+<form ng-submit="sendMessage()">
+  Enter text and hit enter:
+  <input type="text" ng-model="text" name="text" />
+  <input type="submit" id="submit" value="Submit" />
+</form>
