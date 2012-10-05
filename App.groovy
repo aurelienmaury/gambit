@@ -6,8 +6,12 @@ def confOrDefault = { configKey, defaultValue ->
 
 def routeMatcher = new RouteMatcher()
 
+def singlePageEntryPoints = ['/about', '/contact']
+
+
+String indexPageName = 'index.html'
 String webRootPrefix = confOrDefault('web_root', 'web') + File.separator
-String indexPage = webRootPrefix + 'index.html'
+String indexPage = webRootPrefix + indexPageName
 boolean gzipFiles = confOrDefault('gzip_files', false)
 
 /**
@@ -29,7 +33,7 @@ routeMatcher.noMatch { req ->
   if (req.path.contains("..")) {
     req.response.statusCode = 404
     req.response.end()
-  } else if (req.path == '/') {
+  } else if (req.path == '/' || singlePageEntryPoints.contains(req.path)) {
     req.response.sendFile(indexPage)
   } else {
     // try to send *.gz file
@@ -43,9 +47,17 @@ routeMatcher.noMatch { req ->
         req.response.sendFile(fileName)
       }
     } else {
-      if (new File(fileName).exists()) {
+      def targetFile = new File(fileName)
+      if (targetFile.exists()) {
         // send not gzip file
+        if (targetFile.isDirectory()) {
+
+        req.response.sendFile(fileName+File.separator+indexPageName)
+          } else {
+
         req.response.sendFile(fileName)
+        }
+            
       } else {
         req.response.statusCode = 404
         req.response.end()
