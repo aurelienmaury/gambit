@@ -54,4 +54,8 @@ routeMatcher.noMatch { req ->
   }
 }
 
-vertx.createHttpServer().requestHandler(routeMatcher.asClosure()).listen(confOrDefault('port', 80) as int, confOrDefault("host", "0.0.0.0") as String)
+String host = confOrDefault("host", "0.0.0.0")
+Integer port = confOrDefault('port', 80)
+vertx.createHttpServer().requestHandler(routeMatcher.asClosure()).listen(port, host)
+
+println "Listening ${host}:${port}..."
