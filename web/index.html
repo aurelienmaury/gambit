@@ -4,14 +4,24 @@
   <meta charset="utf-8">
   <title>Vert.x demo</title>
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" href="assets/css/app.css">
   <style>[ng-cloak] {display: none}</style>
 </head>
 
 <body class="container" ng-controller="HomeCtrl">
   
-  <a ng-click="$location.path('/home')">Home</a> |
-  <a ng-click="$location.path('/about')">About</a>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <ul class="nav">
+        <li ng-class="{active: $location.path() == '/'}">
+          <a ng-click="$location.path('/home')">Home</a>
+        </li>
+        <li ng-class="{active: $location.path() == '/about'}">
+          <a ng-click="$location.path('/about')">About</a>
+        </li>
+      </ul>
+    </div>
+  </div>
 
   <ng:view></ng:view>
 
