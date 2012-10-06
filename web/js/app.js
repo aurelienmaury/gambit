@@ -10,6 +10,10 @@ var gambitModule = angular.module('gambit', [], function($routeProvider, $locati
         templateUrl: 'ng/about.html'
     });
 
+    $routeProvider.when('/contact', {
+        templateUrl: 'ng/contact.html'
+    });
+
     $routeProvider.otherwise({redirectTo:'/'});
     
     $locationProvider.html5Mode(true);
@@ -26,20 +30,6 @@ gambitModule.value('refdata', {
 	  });
 
 
-
-function RouteCtrl($route) {
-
-    var self = this;
-
-    $route.when('/', {template:'ng/home.html'});
-
-    $route.when('/outwards', {template:'ng/outwards.html'});
-
-    $route.when('/inwards/:outwardId', {template:'ng/inwards.html'});
-
-    $route.otherwise({redirectTo:'/'});
-}
-
 function HomeCtrl($scope, $route, $routeParams, $location, refdata) {
     $scope.$route = $route;
     $scope.$location = $location;
@@ -48,6 +38,13 @@ function HomeCtrl($scope, $route, $routeParams, $location, refdata) {
 }
 
 function AboutCtrl($scope, $route, $routeParams, $location, refdata) {
+    $scope.$route = $route;
+    $scope.$location = $location;
+    $scope.$routeParams = $routeParams;
+    $scope.refdata = refdata;
+}
+
+function ContactCtrl($scope, $route, $routeParams, $location, refdata) {
     $scope.$route = $route;
     $scope.$location = $location;
     $scope.$routeParams = $routeParams;

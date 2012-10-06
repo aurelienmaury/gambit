@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Vert.x demo</title>
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" href="assets/css/app.css">
   <style>[ng-cloak] {display: none}</style>
 </head>
@@ -12,6 +13,8 @@
   
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
+      <div class="container">
+      <a class="brand" ng-click="$location.path('/home')">Gambit</a>
       <ul class="nav">
         <li ng-class="{active: $location.path() == '/'}">
           <a ng-click="$location.path('/home')">Home</a>
@@ -19,14 +22,19 @@
         <li ng-class="{active: $location.path() == '/about'}">
           <a ng-click="$location.path('/about')">About</a>
         </li>
+        <li ng-class="{active: $location.path() == '/contact'}">
+          <a ng-click="$location.path('/contact')">Contact</a>
+        </li>
       </ul>
+      </div>
     </div>
   </div>
 
-  <ng:view></ng:view>
+  <div class="container ng-view"></div>
 
-  <footer id="info">
-    <p>Vert.x demo | @aurelienmaury</p>
+  <hr/>
+  <footer>
+    <p>AngularJs & Vert.x demo by Aurelien Maury</p>
   </footer>
 
   <script src="assets/js/angular-1.0.2/angular.min.js"></script>

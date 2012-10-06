@@ -1,11 +1,16 @@
-<h1>Contact</h1>
- 
-<p>
- 	Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.
-</p>
+<div class="row" ng-controller="ContactCtrl">
+	<div class="span12">
+	<h1>Contact</h1>
+	</div>
+	<div class="span8 offset2">
 
-<form ng-submit="sendMessage()">
-  Enter text and hit enter:
-  <input type="text" ng-model="text" name="text" />
-  <input type="submit" id="submit" value="Submit" />
-</form>
+	<textarea class="span8" rows="7" readonly="readonly"></textarea>
+
+	<form class="form-search">
+  		<div class="input-append">
+    		<input type="text" class="search-query">
+    		<button type="submit" class="btn">Say</button>
+  		</div>
+	</form>
+	</div>
+</div>
