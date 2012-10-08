@@ -66,8 +66,32 @@ routeMatcher.noMatch { req ->
   }
 }
 
+def server = vertx.createHttpServer().requestHandler(routeMatcher.asClosure())
+
+/**
+ * SockJS bridge.
+ */
+
+def sockJsConfig = [
+  prefix: "/eventbus"
+]
+
+def inboundPermitted = [
+    ['address': 'gambit.chat']
+  ]
+def outboundPermitted = [
+    ['address': 'gambit.chat']
+  ]
+
+vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outboundPermitted)
+
+/**
+ * Starting the server.
+ */
+
 String host = confOrDefault("host", "0.0.0.0")
 Integer port = confOrDefault('port', 80)
-vertx.createHttpServer().requestHandler(routeMatcher.asClosure()).listen(port, host)
+
+server.listen(port, host)
 
 println "Listening ${host}:${port}..."

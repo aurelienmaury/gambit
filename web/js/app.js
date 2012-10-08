@@ -28,21 +28,24 @@ gambitModule.value('refdata', {
 	    }
 	  });
 
-gambitModule.factory('event-bus', function() {
+gambitModule.factory('eventbus', function() {
     var eb = new vertx.EventBus(	window.location.protocol + '//' 
     							+ 	window.location.hostname + ':' 
     							+ 	window.location.port + '/eventbus');
 
-	eb.onopen = function() {    
-    	eb.registerHandler('agora.out', function(body) { });
-  	};
-
-
-	eb.onclose = function() {
-		eb = null;
-	};
-
-    return eb;
+    return {
+        bus: eb,
+        sendChat: function(chatMessage) {
+            this.bus.publish('gambit.chat', {message: chatMessage});
+        },
+        handle: function(channel, handler) {
+            var bus = this.bus;
+            bus.onopen = function() {
+                console.log('added handler on '+channel);
+                bus.registerHandler(channel, handler);
+            };
+        }
+    };
   });
 
 function RootCtrl($scope, $route, $routeParams, $location, refdata) {
@@ -58,5 +61,21 @@ function HomeCtrl() {
 function AboutCtrl() {    
 }
 
-function ContactCtrl(event-bus) {
+function ContactCtrl($scope, eventbus) {
+    $scope.chatHistory = [];
+    $scope.chatInput = '';
+
+    eventbus.handle('gambit.chat', function(evt) {
+        $scope.chatHistory.push({txt: evt.message, author:'evt.author'});
+        $scope.$digest();
+    });
+
+    $scope.eventbus = eventbus;
+    
+    $scope.send = function() {
+        console.log('number of chat history '+$scope.chatHistory.length);
+        console.log('sending '+$scope.chatInput);
+        $scope.eventbus.sendChat($scope.chatInput);
+        $scope.chatInput = '';
+    }
 }

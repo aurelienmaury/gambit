@@ -6,12 +6,19 @@
 	
 	<div class="span8 offset2">
 
-		<div class="span8 bordered chatArea"></div>
+		<div class="span8 bordered chatArea">
+			<div ng-repeat="line in chatHistory">
+				{{$index}} {{line.author}} - {{line.txt}}
+			</div>
+			<div ng-show="!chatHistory.length">
+				Nothing to show
+			</div>
+		</div>
 
-		<form class="form-search">
+		<form class="form-search" ng-submit="send()">
 	  		<div class="input-append">
-	    		<input type="text" class="search-query">
-	    		<button type="submit" class="btn">Say</button>
+	    		<input type="text" ng-model="chatInput" class="search-query">
+	    		<input type="submit" class="btn">Say</input>
 	  		</div>
 		</form>
 
