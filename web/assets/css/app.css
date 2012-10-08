@@ -2,6 +2,16 @@ body {
 	margin-top:60px;
 }
 
+.chatArea {
+	min-height:300px;
+	overflow: auto;
+}
+
+.bordered {
+	margin: 5px;
+	border: 1px solid #EEE;
+}
+
 footer {
 	text-align: center;
 }

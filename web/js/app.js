@@ -26,27 +26,37 @@ gambitModule.value('refdata', {
 	    changeName: function(name) {
 	      this.name = name;
 	    }
-
 	  });
 
+gambitModule.factory('event-bus', function() {
+    var eb = new vertx.EventBus(	window.location.protocol + '//' 
+    							+ 	window.location.hostname + ':' 
+    							+ 	window.location.port + '/eventbus');
 
-function HomeCtrl($scope, $route, $routeParams, $location, refdata) {
+	eb.onopen = function() {    
+    	eb.registerHandler('agora.out', function(body) { });
+  	};
+
+
+	eb.onclose = function() {
+		eb = null;
+	};
+
+    return eb;
+  });
+
+function RootCtrl($scope, $route, $routeParams, $location, refdata) {
     $scope.$route = $route;
     $scope.$location = $location;
     $scope.$routeParams = $routeParams;
     $scope.refdata = refdata;
 }
 
-function AboutCtrl($scope, $route, $routeParams, $location, refdata) {
-    $scope.$route = $route;
-    $scope.$location = $location;
-    $scope.$routeParams = $routeParams;
-    $scope.refdata = refdata;
+function HomeCtrl() {
 }
 
-function ContactCtrl($scope, $route, $routeParams, $location, refdata) {
-    $scope.$route = $route;
-    $scope.$location = $location;
-    $scope.$routeParams = $routeParams;
-    $scope.refdata = refdata;
+function AboutCtrl() {    
+}
+
+function ContactCtrl(event-bus) {
 }
