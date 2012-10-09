@@ -18,8 +18,8 @@ function upload(file) {
       }, false);
   xhr.open("PUT", "/upload?filename=customName");
 
-  reader.onload = function(evt) {
-    console.log('reader loaded');
+  reader.onprogress = function(evt) {
+    console.log('reader progress');
     xhr.send(evt.target.result);
   };
 
