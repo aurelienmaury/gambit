@@ -2,7 +2,6 @@
 <head>
 <script>
 function upload(file) {
-  var reader = new FileReader();
   var xhr = new XMLHttpRequest();
   
   xhr.upload.addEventListener("progress", function(e) {
@@ -17,34 +16,28 @@ function upload(file) {
           
       }, false);
   xhr.open("PUT", "/upload?filename=customName");
-
-  reader.onprogress = function(evt) {
-    console.log('reader progress');
-    xhr.send(evt.target.result);
-  };
-
-  console.log('reading file');
-  reader.readAsBinaryString(file);
+  
+  xhr.send(file); 
 };
 
 
 window.onload = function() {
-            var dropzone = document.getElementById("dropzone");
-            dropzone.ondragover = dropzone.ondragenter = function(event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-     
-            dropzone.ondrop = function(event) {
-                event.stopPropagation();
-                event.preventDefault();
- 
-                var filesArray = event.dataTransfer.files;
-                for (var i=0; i<filesArray.length; i++) {
-                    upload(filesArray[i]);
-                }
-            }
-          };
+  var dropzone = document.getElementById("dropzone");
+  dropzone.ondragover = dropzone.ondragenter = function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+  }
+
+  dropzone.ondrop = function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      var filesArray = event.dataTransfer.files;
+      for (var i=0; i<filesArray.length; i++) {
+          upload(filesArray[i]);
+      }
+  }
+};
 </script>
 </head>
 <body>
