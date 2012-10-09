@@ -8,8 +8,14 @@ body {
 }
 
 .bordered {
-	margin: 5px;
-	border: 1px solid #EEE;
+	margin: 0;
+	margin-bottom: 10px;
+	border: 1px solid #CCC;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	padding: 14px;
+	
 }
 
 footer {

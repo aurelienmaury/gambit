@@ -8,7 +8,7 @@
 
 		<div class="span8 bordered chatArea">
 			<div ng-repeat="line in chatHistory">
-				{{$index}} {{line.author}} - {{line.txt}}
+				{{line.nick}} - {{line.txt}}
 			</div>
 			<div ng-show="!chatHistory.length">
 				Nothing to show

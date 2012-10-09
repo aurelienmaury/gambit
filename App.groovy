@@ -1,4 +1,5 @@
 import org.vertx.groovy.core.http.RouteMatcher
+import static org.vertx.groovy.core.streams.Pump.createPump
 
 def confOrDefault = { configKey, defaultValue ->
   container.config[configKey] ?: defaultValue
@@ -18,7 +19,23 @@ boolean gzipFiles = confOrDefault('gzip_files', false)
  * Rest routes
  */
 
-
+routeMatcher.put('/upload') { req ->
+  println "matched upload : $req.params"
+  req.pause()
+  def filename = "${UUID.randomUUID()}.uploaded"
+  vertx.fileSystem.open(filename) { ares ->
+    def file = ares.result
+    def pump = createPump(req, file.writeStream)
+    req.endHandler {
+      file.close {
+        println "Uploaded ${pump.bytesPumped} bytes to $filename"
+        req.response.end()
+      }
+    }
+    pump.start()
+    req.resume()
+  }
+}
 
 /**
  * When no route matches, then serve static files
@@ -66,6 +83,8 @@ routeMatcher.noMatch { req ->
   }
 }
 
+container.deployVerticle('verticles/Nicks.groovy')
+
 def server = vertx.createHttpServer().requestHandler(routeMatcher.asClosure())
 
 /**
@@ -77,10 +96,12 @@ def sockJsConfig = [
 ]
 
 def inboundPermitted = [
-    ['address': 'gambit.chat']
+    ['address': 'gambit.chat'],
+    ['address': 'nicks.get']
   ]
 def outboundPermitted = [
-    ['address': 'gambit.chat']
+    ['address': 'gambit.chat'],
+    ['address': 'nicks.get']
   ]
 
 vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outboundPermitted)
