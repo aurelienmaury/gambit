@@ -2,38 +2,42 @@
 <html lang="en" ng-app="gambit">
 <head>
   <meta charset="utf-8">
-  <title>Vert.x demo</title>
+  <title>Gambit</title>
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" href="assets/css/app.css">
 </head>
 
-<body class="container" ng-controller="RootCtrl">
+<body ng-controller="RootCtrl">
+
   
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container">
-      <a class="brand" ng-click="$location.path('/home')">Gambit</a>
-      <ul class="nav">
-        <li ng-class="{active: $location.path() == '/'}">
-          <a ng-click="$location.path('/home')">Home</a>
-        </li>
-        <li ng-class="{active: $location.path() == '/about'}">
-          <a ng-click="$location.path('/about')">About</a>
-        </li>
-        <li ng-class="{active: $location.path() == '/contact'}">
-          <a ng-click="$location.path('/contact')">Contact</a>
-        </li>
-      </ul>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+        <a class="brand" ng-click="$location.path('/home')">Gambit</a>
+        <ul class="nav">
+          <li ng-class="{active: $location.path() == '/'}">
+            <a ng-click="$location.path('/home')">Home</a>
+          </li>
+          <li ng-class="{active: $location.path() == '/upload-board'}">
+            <a ng-click="$location.path('/upload-board')">Upload Board</a>
+          </li>
+          <li ng-class="{active: $location.path() == '/contact'}">
+            <a ng-click="$location.path('/contact')">Contact</a>
+          </li>
+        </ul>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="container ng-view"></div>
+    <div class="mainview">
+      <div class="container ng-view"></div>
+    </div>
 
-  <hr/>
+  
+
   <footer>
-    <p>AngularJs & Vert.x demo by Aurelien Maury</p>
+    <p>AngularJs - Vert.x - Aurelien Maury</p>
   </footer>
 
   <script src="assets/js/angular-1.0.2/angular.min.js"></script>
@@ -41,5 +45,7 @@
   <script src="assets/js/vertxbus.js"></script>
 
   <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
 </body>
 </html>
