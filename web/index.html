@@ -9,23 +9,31 @@
 </head>
 
 <body ng-controller="RootCtrl">
-
   
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-        <a class="brand" ng-click="$location.path('/home')">Gambit</a>
-        <ul class="nav">
-          <li ng-class="{active: $location.path() == '/'}">
-            <a ng-click="$location.path('/home')">Home</a>
-          </li>
-          <li ng-class="{active: $location.path() == '/upload-board'}">
-            <a ng-click="$location.path('/upload-board')">Upload Board</a>
-          </li>
-          <li ng-class="{active: $location.path() == '/contact'}">
-            <a ng-click="$location.path('/contact')">Contact</a>
-          </li>
-        </ul>
+
+            <a class="brand" ng-click="$location.path('/home')">Gambit</a>
+
+            <ul class="nav">
+              <li ng-class="{active: $location.path() == '/'}">
+                <a ng-click="$location.path('/home')">Home</a>
+              </li>
+              <li ng-class="{active: $location.path() == '/upload-board'}">
+                <a ng-click="$location.path('/upload-board')">Upload Board</a>
+              </li>
+              <li ng-class="{active: $location.path() == '/contact'}">
+                <a ng-click="$location.path('/contact')">Contact</a>
+              </li>
+            </ul>
+
+            <form class="navbar-form pull-right">
+              <input class="span2" type="text" placeholder="Email">
+              <input class="span2" type="password" placeholder="Password">
+              <button type="submit" class="btn">Sign in</button>
+            </form>
+
         </div>
       </div>
     </div>

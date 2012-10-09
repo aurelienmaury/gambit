@@ -7,19 +7,29 @@ body {
 	position: absolute;
 }
 
-.home-top {
-	background-color: #EEE;
+.home-top-title {
+	color: #fff;
+	background-color: #F89406;
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
 	border-radius: 6px;
-}
-
-.home-top .title{
 	font-weight: bold;
 	text-align: center;
 	padding-top: 5px;
 	padding-bottom: 5px;
 }
+
+.home-top {
+	background-color: #EEE;
+	
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+
 
 .mainview {
 	position: absolute;
@@ -36,6 +46,9 @@ body {
 	overflow: auto;
 }
 
+.column-header {
+	margin-bottom: 10px;
+}
 .bordered {
 	margin-bottom: 10px;
 	border: 1px solid #CCC;
