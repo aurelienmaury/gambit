@@ -7,7 +7,6 @@ def nouns = ['vampire','troll','dwarf','samurai','ninja','goblin','ice','blob', 
 
 vertx.eventBus.registerHandler('nicks.get') { message ->
 	def uuid = message.body.uuid
-	println "called by $uuid"
 	
 	if (!nicks[uuid]) {
 

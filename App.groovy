@@ -7,7 +7,7 @@ def confOrDefault = { configKey, defaultValue ->
 
 def routeMatcher = new RouteMatcher()
 
-def singlePageEntryPoints = ['/about', '/contact']
+def singlePageEntryPoints = ['/upload-board', '/contact']
 
 
 String indexPageName = 'index.html'
@@ -20,16 +20,19 @@ boolean gzipFiles = confOrDefault('gzip_files', false)
  */
 
 routeMatcher.put('/upload') { req ->
-  println "matched upload : $req.params"
+  
+  def targetFilename = req.params.filename
   req.pause()
-  def filename = "${UUID.randomUUID()}.uploaded"
+  def filename = "${UUID.randomUUID()}.uploading"
   vertx.fileSystem.open(filename) { ares ->
     def file = ares.result
     def pump = createPump(req, file.writeStream)
     req.endHandler {
       file.close {
-        println "Uploaded ${pump.bytesPumped} bytes to $filename"
-        req.response.end()
+        file.move(filename, targetFilename) {
+          println "Uploaded ${pump.bytesPumped} bytes to $targetFilename"
+          req.response.end()
+        }
       }
     }
     pump.start()

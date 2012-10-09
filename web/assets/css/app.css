@@ -7,12 +7,27 @@ body {
 	position: absolute;
 }
 
+.home-top {
+	background-color: #EEE;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+
+.home-top .title{
+	font-weight: bold;
+	text-align: center;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
 .mainview {
 	position: absolute;
 	top:41px;
 	bottom:40px;
 	left:0;
 	right:0;
+	padding-top: 20px;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -22,7 +37,6 @@ body {
 }
 
 .bordered {
-	margin: 0;
 	margin-bottom: 10px;
 	border: 1px solid #CCC;
 	-webkit-border-radius: 10px;
@@ -30,6 +44,10 @@ body {
 	border-radius: 10px;
 	padding: 14px;
 	
+}
+
+form.chat {
+	margin-left: 30px;
 }
 
 footer {

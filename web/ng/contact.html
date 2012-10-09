@@ -4,23 +4,20 @@
 		<h1>Contact</h1>
 	</div>
 	
-	<div class="span8 offset2">
+	
 
-		<div class="span8 bordered chatArea">
+		<div class="span12 bordered chatArea">
 			<div ng-repeat="line in chatHistory">
 				{{line.nick}} - {{line.txt}}
 			</div>
-			<div ng-show="!chatHistory.length">
-				Nothing to show
-			</div>
 		</div>
 
-		<form class="form-search" ng-submit="send()">
+		<form class="form-search chat" ng-submit="send()">
 	  		<div class="input-append">
-	    		<input type="text" ng-model="chatInput" class="search-query">
+	    		<input type="text" ng-model="chatInput" class="search-query input-xxlarge">
 	    		<input type="submit" class="btn">Say</input>
 	  		</div>
 		</form>
 
-	</div>
+	
 </div>
