@@ -36,7 +36,25 @@ function UploadCtrl($scope) {
       xhr.open("PUT", "/upload?filename=customName");
       
       xhr.send(file); 
-    };   
+    };
+
+
+
+    var dropzone = document.getElementById("dropzone");
+    dropzone.ondragover = dropzone.ondragenter = function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+
+    dropzone.ondrop = function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      var filesArray = event.dataTransfer.files;
+      for (var i=0; i<filesArray.length; i++) {
+          upload(filesArray[i]);
+      }
+    } 
 }
 
 function ContactCtrl($scope, eventbus, channelsInit) {
@@ -45,13 +63,12 @@ function ContactCtrl($scope, eventbus, channelsInit) {
 
     channelsInit['gambit.chat'] = function(evt) {
         $scope.chatHistory.push({txt: evt.message, nick: evt.nick});
-        $scope.$digest();
+        $scope.$apply();
     };
     
     $scope.send = function() {
         
         eventbus.sendChat($scope.chatInput);
-        
         $scope.chatInput = '';
     }
 }
