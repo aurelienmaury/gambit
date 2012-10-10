@@ -39,7 +39,7 @@ function UploadCtrl($scope) {
     };
 
 
-
+/*
     var dropzone = document.getElementById("dropzone");
     dropzone.ondragover = dropzone.ondragenter = function(event) {
       event.stopPropagation();
@@ -55,6 +55,8 @@ function UploadCtrl($scope) {
           upload(filesArray[i]);
       }
     } 
+
+    */
 }
 
 function ContactCtrl($scope, eventbus, channelsInit) {
