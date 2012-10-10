@@ -9,9 +9,14 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
     $scope.$route = $route;
     $scope.$location = $location;
     $scope.$routeParams = $routeParams;
+    $scope.FileStatus = FileStatus;
 
     $scope.chatHistory = [];
-    $scope.uploadFileList = [];
+    $scope.uploadFileList = [
+      {name:'file 1', status: FileStatus.UPLOADING, progress: 60},
+      {name:'file 2', status: FileStatus.SELECTED},
+      {name:'file 3', status: FileStatus.FINISHED},
+    ];
 }
 
 function HomeCtrl() {
@@ -19,8 +24,8 @@ function HomeCtrl() {
 
 function UploadCtrl($scope, uploader) {
 
-  onDrop = function() {
-    console.log('onDrop fired in controller');
+  $scope.onDrop = function(file) {
+    console.log('onDrop fired in controller'+file.name);
   };
 }
 

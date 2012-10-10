@@ -14,25 +14,10 @@
 	        </div>
 
 			<ul class="nav nav-tabs nav-stacked">
-			  <li>
-			  	File 1
-			  	<button type="button" class="close">×</button>
-				
-			  </li>
-			  <li>
-			  	File 2
-				<div class="progress progress-info">
-				  <div class="bar" style="width: 60%"></div>
-				</div>
-			  </li>
-			  <li>
-			  	File 3
-			  	<button type="button" class="close">×</button>
-				<span class="label label-success">done</span>
+			  <li ng-repeat="file in uploadFileList">
+				<uploadfile file="file"/>
 			  </li>
 			</ul>
-
-			
 		</div>
 		<div class="span6">			
 			<uploadbox/>
