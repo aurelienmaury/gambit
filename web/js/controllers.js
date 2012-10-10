@@ -17,46 +17,11 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
 function HomeCtrl() {
 }
 
-function UploadCtrl($scope) {
+function UploadCtrl($scope, uploader) {
 
-    $scope.upload = function(file) {
-      var xhr = new XMLHttpRequest();
-      
-      xhr.upload.addEventListener("progress", function(e) {
-            if (e.lengthComputable) {
-              var percentage = Math.round((e.loaded * 100) / e.total);
-              console.log('ok:'+percentage+'%');
-            }
-          }, false);
-       
-      xhr.upload.addEventListener("load", function(e){
-              console.log('finished');
-              
-          }, false);
-      xhr.open("PUT", "/upload?filename=customName");
-      
-      xhr.send(file); 
-    };
-
-
-/*
-    var dropzone = document.getElementById("dropzone");
-    dropzone.ondragover = dropzone.ondragenter = function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-    }
-
-    dropzone.ondrop = function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-
-      var filesArray = event.dataTransfer.files;
-      for (var i=0; i<filesArray.length; i++) {
-          upload(filesArray[i]);
-      }
-    } 
-
-    */
+  onDrop = function() {
+    console.log('onDrop fired in controller');
+  };
 }
 
 function ContactCtrl($scope, eventbus, channelsInit) {

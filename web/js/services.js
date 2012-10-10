@@ -30,4 +30,24 @@ gambitModule.factory('eventbus', function(channelsInit) {
             }
         }
     };
-  });
+});
+
+
+gambitModule.factory('uploader', function() {
+    return {
+        send: function(file, progressLog) {
+                var xhr = new XMLHttpRequest();
+                  
+                xhr.upload.addEventListener("progress", function(e) {
+                        if (e.lengthComputable) {
+                          progressLog = Math.round((e.loaded * 100) / e.total);
+                        }
+                      }, false);
+                   
+                xhr.upload.addEventListener("load", function(e){ progressLog = 100; }, false);
+
+                xhr.open("PUT", "/upload?filename=customName");
+                xhr.send(file); 
+        }
+    };
+});
