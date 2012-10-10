@@ -1,0 +1,50 @@
+gambitModule.directive('uploadbox', function(){
+    return {
+      restrict: 'E',
+      replace: true,
+      transclude: true,
+      scope: true,
+      templateUrl: 'ng/directives/uploadbox.html',
+      link: function(scope, element, attrs) {
+        
+        var behaviorOnOver = function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          var elem = angular.element(element).children('#uploadbox-label');
+          elem.addClass('label-success');
+          elem.removeClass('label-info');
+        };
+
+        var behaviorOnOut = function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          var elem = angular.element(element).children('#uploadbox-label');
+          elem.removeClass('label-success');
+          elem.addClass('label-info');
+        };
+
+        element.bind('dragover', behaviorOnOver);
+        element.bind('dragenter', behaviorOnOver);
+        element.bind('dragleave', behaviorOnOut);
+        element.bind('drop', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          console.log('dropped');
+          angular.forEach(e.dataTransfer.files, function(droppedFile) {
+            scope.$parent.onDrop(droppedFile);
+          });
+        });
+
+      }
+    }
+});
+
+gambitModule.directive('uploadfile', function(){
+    return {
+      restrict: 'E',
+      replace: true,
+      transclude: true,
+      scope: true,
+      templateUrl: 'ng/directives/uploadfile.html'
+    }
+});
