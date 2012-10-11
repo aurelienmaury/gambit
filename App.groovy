@@ -29,7 +29,7 @@ routeMatcher.put('/upload') { req ->
     def pump = createPump(req, file.writeStream)
     req.endHandler {
       file.close {
-        file.move(filename, targetFilename) {
+        vertx.fileSystem.move(filename, targetFilename) {
           println "Uploaded ${pump.bytesPumped} bytes to $targetFilename"
           req.response.end()
         }

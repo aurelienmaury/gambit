@@ -12,20 +12,34 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
     $scope.FileStatus = FileStatus;
 
     $scope.chatHistory = [];
-    $scope.uploadFileList = [
-      {name:'file 1', status: FileStatus.UPLOADING, progress: 60},
-      {name:'file 2', status: FileStatus.SELECTED},
-      {name:'file 3', status: FileStatus.FINISHED},
-    ];
+    $scope.uploadFileList = [];
 }
 
 function HomeCtrl() {
 }
 
-function UploadCtrl($scope, uploader) {
+function UploadCtrl($scope, $location, uploader) {
+
+  $scope.removeFile = function(index) {
+    $scope.uploadFileList.splice(index, 1);
+  };
+
+  $scope.sendAll = function () {
+    angular.forEach($scope.uploadFileList, function(fileDesc) {
+        if (fileDesc.status == FileStatus.SELECTED) {
+            uploader.send(fileDesc, function() {
+                if ($location.path() == '/upload-board') {
+                    $scope.$apply();
+                }
+            });
+        } 
+    });
+  }
+
 
   $scope.onDrop = function(file) {
-    console.log('onDrop fired in controller'+file.name);
+    $scope.uploadFileList.push({name:file.name, status: FileStatus.SELECTED, file: file});
+    $scope.$apply();
   };
 }
 

@@ -11,7 +11,7 @@ gambitModule.directive('uploadbox', function(){
           e.stopPropagation();
           e.preventDefault();
           var elem = angular.element(element).children('#uploadbox-label');
-          elem.addClass('label-success');
+          elem.addClass('label-warning');
           elem.removeClass('label-info');
         };
 
@@ -19,7 +19,7 @@ gambitModule.directive('uploadbox', function(){
           e.stopPropagation();
           e.preventDefault();
           var elem = angular.element(element).children('#uploadbox-label');
-          elem.removeClass('label-success');
+          elem.removeClass('label-warning');
           elem.addClass('label-info');
         };
 
@@ -29,7 +29,9 @@ gambitModule.directive('uploadbox', function(){
         element.bind('drop', function(e) {
           e.stopPropagation();
           e.preventDefault();
-          console.log('dropped');
+          var elem = angular.element(element).children('#uploadbox-label');
+          elem.removeClass('label-warning');
+          elem.addClass('label-info');
           angular.forEach(e.dataTransfer.files, function(droppedFile) {
             scope.$parent.onDrop(droppedFile);
           });

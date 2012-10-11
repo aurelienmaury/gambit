@@ -9,13 +9,13 @@
 			</p>
 
 			<div class="btn-toolbar">
-	            <button class="btn btn-info">Send all</button>
+	            <button ng-click="sendAll()" class="btn btn-info">Send all</button>
 	            <button class="btn btn-warning pull-right">Clear</button>                
 	        </div>
 
 			<ul class="nav nav-tabs nav-stacked">
 			  <li ng-repeat="file in uploadFileList">
-				<uploadfile file="file"/>
+				<uploadfile file="file" index="$index"/>
 			  </li>
 			</ul>
 		</div>
