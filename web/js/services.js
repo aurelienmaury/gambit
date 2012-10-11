@@ -28,6 +28,14 @@ gambitModule.factory('eventbus', function(channelsInit) {
                     self.bus.publish('gambit.chat', {message: chatMessage, nick: self.nick});
                 }
             }
+        },
+        handle: function(channel, handler) {
+            var self = this;
+            if (self.bus.readyState == vertx.EventBus.OPEN) {
+                self.bus.registerHandler(channel, handler);
+            } else {
+                channelsInit[channel] = handler;
+            }
         }
     };
 });

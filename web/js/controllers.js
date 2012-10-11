@@ -46,15 +46,16 @@ function UploadCtrl($scope, $location, uploader) {
 function ContactCtrl($scope, eventbus, channelsInit) {
     
     $scope.chatInput = '';
+    $scope.nick = eventbus.nick;
 
-    channelsInit['gambit.chat'] = function(evt) {
+    eventbus.handle('gambit.chat', function(evt) {
         $scope.chatHistory.push({txt: evt.message, nick: evt.nick});
         $scope.$apply();
-    };
+    });
     
     $scope.send = function() {
-        
         eventbus.sendChat($scope.chatInput);
         $scope.chatInput = '';
+        $scope.$apply();
     }
 }
