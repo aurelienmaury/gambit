@@ -1,121 +1,133 @@
+/**
+ * Imports
+ */
 import org.vertx.groovy.core.http.RouteMatcher
 import static org.vertx.groovy.core.streams.Pump.createPump
 
-def confOrDefault = { configKey, defaultValue ->
-  container.config[configKey] ?: defaultValue
-}
-
-def routeMatcher = new RouteMatcher()
-
-def singlePageEntryPoints = ['/upload-board', '/contact']
-
-
-String indexPageName = 'index.html'
-String webRootPrefix = confOrDefault('web_root', 'web') + File.separator
-String indexPage = webRootPrefix + indexPageName
-boolean gzipFiles = confOrDefault('gzip_files', false)
+def fs = vertx.fileSystem
+def server = vertx.createHttpServer()
 
 /**
- * Rest routes
+ * Configuration
  */
+def conf = [
+    host: container.config['host'] ?: '0.0.0.0',
+    port: container.config['port'] ?: 8081,
+    spiEntries: ['/', '/upload-board', '/contact']
+]
 
-routeMatcher.put('/upload') { req ->
-  
-  def targetFilename = req.params.filename
-  req.pause()
-  def filename = "${UUID.randomUUID()}.uploading"
-  vertx.fileSystem.open(filename) { ares ->
-    def file = ares.result
-    def pump = createPump(req, file.writeStream)
-    req.endHandler {
-      file.close {
-        vertx.fileSystem.move(filename, targetFilename) {
-          println "Uploaded ${pump.bytesPumped} bytes to $targetFilename"
-          req.response.end()
+/* Constants */
+String defaultIndex = 'index.html'
+String webRootPrefix = 'web' + File.separator
+String rootIndexPage = webRootPrefix + defaultIndex
+
+/**
+ * REST Routes definition
+ */
+def simpleRestRoutes = [
+    'PUT->/upload': { req ->
+      req.pause()
+      def fileName = req.params.filename
+      def tmpFileName = "${UUID.randomUUID()}.uploading"
+      fs.open(tmpFileName) { asyncRes ->
+        def file = asyncRes.result
+        def pump = createPump(req, file.writeStream)
+        req.endHandler {
+          file.close {
+            fs.move(tmpFileName, fileName) {
+              println "Uploaded ${pump.bytesPumped} bytes to $fileName"
+              req.response.end()
+            }
+          }
         }
+        pump.start()
+        req.resume()
       }
     }
-    pump.start()
-    req.resume()
+]
+
+/**
+ * REST Routes wiring
+ */
+def routeMatcher = new RouteMatcher()
+simpleRestRoutes.each { route, behavior ->
+  def parts = route.split('->')
+  switch (parts[0]) {
+    case 'PUT':
+      routeMatcher.put(parts[1], behavior)
+      break
+    case 'GET':
+      routeMatcher.get(parts[1], behavior)
+      break
+    case 'POST':
+      routeMatcher.post(parts[1], behavior)
+      break
+    case 'DELETE':
+      routeMatcher.delete(parts[1], behavior)
+      break
   }
 }
 
-/**
- * When no route matches, then serve static files
- */
+// When no route matches, then serve static files.
 routeMatcher.noMatch { req ->
-  // browser gzip capability check
-  String acceptEncoding = req.headers['accept-encoding']
-  boolean acceptEncodingGzip = acceptEncoding?.contains('gzip')
-
-  String fileName = webRootPrefix + req.path
 
   if (req.path.contains("..")) {
+    // No relative path to ensure target is in the web sandbox.
     req.response.statusCode = 404
     req.response.end()
-  } else if (req.path == '/' || singlePageEntryPoints.contains(req.path)) {
-    req.response.sendFile(indexPage)
+  } else if (conf.spiEntries.contains(req.path)) {
+    // Every SPI entries leads to serving the root index page.
+    req.response.sendFile(rootIndexPage)
   } else {
-    // try to send *.gz file
-    if (gzipFiles && acceptEncodingGzip) {
-      if (new File(fileName + '.gz').exists()) {
-        // found file with gz extension
-        req.response.headers['content-encoding'] = 'gzip'
-        req.response.sendFile(fileName + '.gz')
-      } else {
-        // not found gz file, try to send uncompressed file
-        req.response.sendFile(fileName)
-      }
+    // Any other path
+    String targetStaticFilePath = webRootPrefix + req.path
+    def targetFile = new File(targetStaticFilePath)
+
+    if (!targetFile.exists()) {
+      req.response.statusCode = 404
+      req.response.end()
     } else {
-      def targetFile = new File(fileName)
-      if (targetFile.exists()) {
-        // send not gzip file
-        if (targetFile.isDirectory()) {
-
-        req.response.sendFile(fileName+File.separator+indexPageName)
-          } else {
-
-        req.response.sendFile(fileName)
-        }
-            
+      if (targetFile.isDirectory()) {
+        req.response.sendFile(targetStaticFilePath + File.separator + defaultIndex)
       } else {
-        req.response.statusCode = 404
-        req.response.end()
+        req.response.sendFile(targetStaticFilePath)
       }
     }
   }
 }
 
-container.deployVerticle('verticles/Nicks.groovy')
-
-def server = vertx.createHttpServer().requestHandler(routeMatcher.asClosure())
+// Linking routeMatcher with server.
+server.requestHandler(routeMatcher.asClosure())
 
 /**
- * SockJS bridge.
+ * EventBus players deployment.
  */
+container.deployVerticle('verticles/Nicks.groovy')
 
+/**
+ * SockJS bridge configuration.
+ */
 def sockJsConfig = [
-  prefix: "/eventbus"
+    prefix: '/eventbus'
 ]
 
 def inboundPermitted = [
     ['address': 'gambit.chat'],
     ['address': 'nicks.get']
-  ]
+]
 def outboundPermitted = [
     ['address': 'gambit.chat'],
     ['address': 'nicks.get']
-  ]
+]
 
+/**
+ * SockJS bridge wiring.
+ */
 vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outboundPermitted)
 
 /**
  * Starting the server.
  */
+server.listen(conf.port, conf.host)
 
-String host = confOrDefault("host", "0.0.0.0")
-Integer port = confOrDefault('port', 80)
-
-server.listen(port, host)
-
-println "Listening ${host}:${port}..."
+println "Listening ${conf.host}:${conf.port}..."
