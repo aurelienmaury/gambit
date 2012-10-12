@@ -1,4 +1,11 @@
-gambitModule.value('channelsInit', {});
+gambitModule.value('channelsInit', {
+    'fileStore.uploaded':function (message) {
+        availableFiles.push(message.fileName);
+        console.log('added ' + message.fileName);
+    }
+});
+
+gambitModule.value('availableFiles', []);
 
 gambitModule.factory('eventbus', function (channelsInit) {
     var eb = new vertx.EventBus(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/eventbus');
@@ -39,7 +46,6 @@ gambitModule.factory('eventbus', function (channelsInit) {
     };
 });
 
-
 gambitModule.factory('uploader', function () {
     return {
         send:function (fileDesc, refresh) {
@@ -73,7 +79,7 @@ gambitModule.factory('fileStore', function (eventbus) {
 
     return {
         list:function (callback) {
-            eventbus.send('fileStore.list', {}, function(reply) {
+            eventbus.send('fileStore.list', {}, function (reply) {
                 callback(reply);
             });
         }

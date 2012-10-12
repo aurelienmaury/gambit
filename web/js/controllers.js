@@ -13,7 +13,6 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
 
     $scope.chatHistory = [];
     $scope.uploadFileList = [];
-    $scope.availableFiles = [];
 }
 
 function HomeCtrl($scope, fileStore) {
@@ -31,12 +30,12 @@ function UploadCtrl($scope, $location, uploader) {
             if (fileDesc.status == FileStatus.SELECTED) {
                 uploader.send(fileDesc, function () {
                     if ($location.path() == '/upload-board') {
-                        $scope.$apply();
+                        //$scope.$apply();
                     }
                 });
             }
         });
-    }
+    };
 
     $scope.onDrop = function (file) {
         $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});

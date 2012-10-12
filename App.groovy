@@ -130,11 +130,14 @@ def sockJsConfig = [
 
 def inboundPermitted = [
     ['address': 'gambit.chat'],
-    ['address': 'nicks.get']
+    ['address': 'nicks.get'],
+    ['address': 'fileStore.list']
 ]
 def outboundPermitted = [
     ['address': 'gambit.chat'],
-    ['address': 'nicks.get']
+    ['address': 'nicks.get'],
+    ['address': 'fileStore.list'],
+    ['address': 'fileStore.uploaded']
 ]
 
 /**
@@ -148,7 +151,3 @@ vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outbound
 server.listen(conf.port, conf.host)
 
 println "Listening ${conf.host}:${conf.port} - filestore is ${conf.fileStore} ..."
-
-bus.send('fileStore.list', 'json') { response ->
-  println "res: $response"
-}

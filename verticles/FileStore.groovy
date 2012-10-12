@@ -34,6 +34,7 @@ bus.registerHandler('fileStore.list') { message ->
 
 bus.registerHandler('fileStore.uploaded') { message ->
   def uploadedFileName = message.body.fileName
+    println "upload received:"+uploadedFileName
   fileList << uploadedFileName
 }
 
