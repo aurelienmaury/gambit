@@ -1,10 +1,15 @@
 /**
  * Imports
  */
+
 import org.vertx.groovy.core.http.RouteMatcher
 import static org.vertx.groovy.core.streams.Pump.createPump
+import groovy.json.JsonBuilder
 
+// Useful bindings
 def fs = vertx.fileSystem
+def bus = vertx.eventBus
+
 def server = vertx.createHttpServer()
 
 /**
@@ -13,7 +18,8 @@ def server = vertx.createHttpServer()
 def conf = [
     host: container.config['host'] ?: '0.0.0.0',
     port: container.config['port'] ?: 8081,
-    spiEntries: ['/', '/upload-board', '/contact']
+    spiEntries: ['/', '/upload-board', '/contact'],
+    fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator
 ]
 
 /* Constants */
@@ -27,21 +33,29 @@ String rootIndexPage = webRootPrefix + defaultIndex
 def simpleRestRoutes = [
     'PUT->/upload': { req ->
       req.pause()
-      def fileName = req.params.filename
-      def tmpFileName = "${UUID.randomUUID()}.uploading"
+      def fileName = conf.fileStore + req.params.filename
+      def tmpFileName = "${conf.fileStore}${UUID.randomUUID()}.uploading"
       fs.open(tmpFileName) { asyncRes ->
         def file = asyncRes.result
         def pump = createPump(req, file.writeStream)
         req.endHandler {
           file.close {
             fs.move(tmpFileName, fileName) {
-              println "Uploaded ${pump.bytesPumped} bytes to $fileName"
+              bus.publish('fileStore.uploaded', [fileName: req.params.filename])
               req.response.end()
             }
           }
         }
         pump.start()
         req.resume()
+      }
+    },
+    'GET->/files': { req ->
+      bus.send('fileStore.list', [:]) { busResponse ->
+        req.response.chunked = true
+        req.response.headers['Content-Type'] = 'application/json'
+        req.response << new JsonBuilder(busResponse.body).toString()
+        req.response.end()
       }
     }
 ]
@@ -71,7 +85,7 @@ simpleRestRoutes.each { route, behavior ->
 // When no route matches, then serve static files.
 routeMatcher.noMatch { req ->
 
-  if (req.path.contains("..")) {
+  if (req.path.contains('..')) {
     // No relative path to ensure target is in the web sandbox.
     req.response.statusCode = 404
     req.response.end()
@@ -88,7 +102,9 @@ routeMatcher.noMatch { req ->
       req.response.end()
     } else {
       if (targetFile.isDirectory()) {
-        req.response.sendFile(targetStaticFilePath + File.separator + defaultIndex)
+        req.response.statusCode = 303
+        req.response.headers['Location'] = req.path + '/' + defaultIndex
+        req.response.end()
       } else {
         req.response.sendFile(targetStaticFilePath)
       }
@@ -102,7 +118,8 @@ server.requestHandler(routeMatcher.asClosure())
 /**
  * EventBus players deployment.
  */
-container.deployVerticle('verticles/Nicks.groovy')
+container.deployVerticle('verticles/Nicks.groovy', conf)
+container.deployVerticle('verticles/FileStore.groovy', conf)
 
 /**
  * SockJS bridge configuration.
@@ -130,4 +147,8 @@ vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outbound
  */
 server.listen(conf.port, conf.host)
 
-println "Listening ${conf.host}:${conf.port}..."
+println "Listening ${conf.host}:${conf.port} - filestore is ${conf.fileStore} ..."
+
+bus.send('fileStore.list', 'json') { response ->
+  println "res: $response"
+}

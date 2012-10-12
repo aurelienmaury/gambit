@@ -1,60 +1,62 @@
 <!doctype html>
 <html lang="en" ng-app="gambit">
+
 <head>
-  <meta charset="utf-8">
-  <title>Gambit</title>
-  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/css/bootstrap-responsive.min.css">
-  <link rel="stylesheet" href="css/app.css">
+    <meta charset="utf-8">
+
+    <title>Gambit</title>
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 
 <body ng-controller="RootCtrl">
-  
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
         <div class="container">
 
             <a class="brand" ng-click="$location.path('/home')">Gambit</a>
 
             <ul class="nav">
-              <li ng-class="{active: $location.path() == '/'}">
-                <a ng-click="$location.path('/home')">Home</a>
-              </li>
-              <li ng-class="{active: $location.path() == '/upload-board'}">
-                <a ng-click="$location.path('/upload-board')">Upload Board</a>
-              </li>
-              <li ng-class="{active: $location.path() == '/contact'}">
-                <a ng-click="$location.path('/contact')">Contact</a>
-              </li>
+                <li ng-class="{active: $location.path() == '/'}">
+                    <a ng-click="$location.path('/home')">Home</a>
+                </li>
+                <li ng-class="{active: $location.path() == '/upload-board'}">
+                    <a ng-click="$location.path('/upload-board')">Upload Board</a>
+                </li>
+                <li ng-class="{active: $location.path() == '/contact'}">
+                    <a ng-click="$location.path('/contact')">Contact</a>
+                </li>
             </ul>
 
             <form class="navbar-form pull-right">
-              <input class="span2" type="text" placeholder="Email">
-              <input class="span2" type="password" placeholder="Password">
-              <button type="submit" class="btn">Sign in</button>
+                <input class="span2" type="text" placeholder="Email">
+                <input class="span2" type="password" placeholder="Password">
+                <button type="submit" class="btn">Sign in</button>
             </form>
 
         </div>
-      </div>
     </div>
+</div>
 
-    <div class="mainview">
-      <div class="container ng-view"></div>
-    </div>
+<div class="mainview">
+    <div class="container ng-view"></div>
+</div>
 
-  
 
-  <footer>
+<footer>
     <p>AngularJs - Vert.x - Aurelien Maury</p>
-  </footer>
+</footer>
 
-  <script src="assets/js/angular-1.0.2/angular.min.js"></script>
-  <script src="assets/js/sockjs-0.3.min.js"></script>
-  <script src="assets/js/vertxbus.js"></script>
+<script src="assets/js/angular-1.0.2/angular.min.js"></script>
+<script src="assets/js/sockjs-0.3.min.js"></script>
+<script src="assets/js/vertxbus.js"></script>
 
-  <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="js/directives.js"></script>
+<script src="js/app.js"></script>
+<script src="js/services.js"></script>
+<script src="js/controllers.js"></script>
+<script src="js/directives.js"></script>
 </body>
 </html>
