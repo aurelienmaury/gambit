@@ -4,6 +4,8 @@ var FileStatus = {
     FINISHED:3
 };
 
+gambitModule.value('uploadFileList', []);
+
 function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
 
     $scope.$route = $route;
@@ -12,34 +14,37 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
     $scope.FileStatus = FileStatus;
 
     $scope.chatHistory = [];
-    $scope.uploadFileList = [];
 }
 
 function HomeCtrl($scope, fileStore) {
 
 }
 
-function UploadCtrl($scope, $location, uploader) {
+function UploadCtrl($scope, $location, uploader, uploadFileList) {
+
+    $scope.uploadFileList = uploadFileList;
 
     $scope.removeFile = function (index) {
-        $scope.uploadFileList.splice(index, 1);
+        uploadFileList.splice(index, 1);
     };
 
     $scope.sendAll = function () {
         angular.forEach($scope.uploadFileList, function (fileDesc) {
             if (fileDesc.status == FileStatus.SELECTED) {
                 uploader.send(fileDesc, function () {
-                    if ($location.path() == '/upload-board') {
-                        //$scope.$apply();
-                    }
+                    $scope.$digest()
                 });
             }
         });
     };
 
+    $scope.addMock = function () {
+        uploadFileList.push({name:'file.name', status:FileStatus.SELECTED});
+        console.log('addMock');
+    };
+
     $scope.onDrop = function (file) {
-        $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
-        $scope.$apply();
+        uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
     };
 }
 
@@ -49,8 +54,9 @@ function ContactCtrl($scope, eventbus, channelsInit) {
     $scope.nick = eventbus.nick;
 
     eventbus.handle('gambit.chat', function (evt) {
-        $scope.chatHistory.push({txt:evt.message, nick:evt.nick});
-        $scope.$apply();
+        $scope.$apply(function () {
+            $scope.chatHistory.push({txt:evt.message, nick:evt.nick});
+        });
     });
 
     $scope.send = function () {

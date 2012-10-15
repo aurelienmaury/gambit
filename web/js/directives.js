@@ -3,7 +3,7 @@ gambitModule.directive('uploadbox', function(){
       restrict: 'E',
       replace: true,
       transclude: true,
-      scope: true,
+      scope: {monmien:'&'},
       templateUrl: 'ng/directives/uploadbox.html',
       link: function(scope, element, attrs) {
         
@@ -26,6 +26,10 @@ gambitModule.directive('uploadbox', function(){
         element.bind('dragover', behaviorOnOver);
         element.bind('dragenter', behaviorOnOver);
         element.bind('dragleave', behaviorOnOut);
+        element.bind('click', function(e) {
+            scope.monmien();
+        });
+          /*
         element.bind('drop', function(e) {
           e.stopPropagation();
           e.preventDefault();
@@ -33,9 +37,10 @@ gambitModule.directive('uploadbox', function(){
           elem.removeClass('label-warning');
           elem.addClass('label-info');
           angular.forEach(e.dataTransfer.files, function(droppedFile) {
-            scope.$parent.onDrop(droppedFile);
+             scope.$parent.onDrop(droppedFile);
           });
         });
+        */
 
       }
     }
