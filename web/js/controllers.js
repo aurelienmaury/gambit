@@ -38,13 +38,9 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
         });
     };
 
-    $scope.addMock = function () {
-        uploadFileList.push({name:'file.name', status:FileStatus.SELECTED});
-        console.log('addMock');
-    };
-
     $scope.onDrop = function (file) {
-        uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
+        $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
+        $scope.$digest();
     };
 }
 

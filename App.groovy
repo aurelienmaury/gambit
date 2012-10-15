@@ -103,7 +103,8 @@ routeMatcher.noMatch { req ->
     } else {
       if (targetFile.isDirectory()) {
         req.response.statusCode = 303
-        req.response.headers['Location'] = req.path + '/' + defaultIndex
+        boolean isSeparator = req.path.endsWith('/')
+        req.response.headers['Location'] = req.path + (isSeparator ? '':'/') + defaultIndex
         req.response.end()
       } else {
         req.response.sendFile(targetStaticFilePath)
