@@ -48,27 +48,14 @@ gambitModule.factory('eventbus', function (channelsInit) {
 
 gambitModule.factory('uploader', function () {
     return {
-        send:function (fileDesc, refresh) {
+        send:function (fileDesc, initCallback, progressCallback, endCallback) {
             var xhr = new XMLHttpRequest();
 
-            xhr.upload.addEventListener("progress", function (e) {
-                if (e.lengthComputable) {
+            xhr.upload.addEventListener('progress', progressCallback, false);
+            xhr.upload.addEventListener('load', endCallback, false);
 
-                    fileDesc.progress = Math.round((e.loaded * 100) / e.total);
-                    console.log('progress ' + fileDesc.name + ' ' + fileDesc.progress);
-                    refresh();
-                }
-            }, false);
+            initCallback();
 
-            xhr.upload.addEventListener("load", function (e) {
-                fileDesc.progress = 100;
-                fileDesc.status = FileStatus.FINISHED;
-                refresh();
-            }, false);
-
-            fileDesc.progress = 0;
-            fileDesc.status = FileStatus.UPLOADING;
-            refresh();
             xhr.open("PUT", "/upload?filename=" + fileDesc.name);
             xhr.send(fileDesc.file);
         }

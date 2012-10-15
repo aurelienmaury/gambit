@@ -31,14 +31,42 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
     $scope.sendAll = function () {
         angular.forEach($scope.uploadFileList, function (fileDesc) {
             if (fileDesc.status == FileStatus.SELECTED) {
-                uploader.send(fileDesc, function () {});
+                uploader.send(fileDesc,
+                    function () {
+                        $scope.$apply(function () {
+                            fileDesc.progress = 0;
+                            fileDesc.status = FileStatus.UPLOADING;
+                        });
+                    },
+                    function (e) {
+                        if (e.lengthComputable) {
+                            $scope.$apply(function () {
+                                fileDesc.progress = Math.round((e.loaded * 100) / e.total);
+                                console.log('progress ' + fileDesc.name + ' ' + fileDesc.progress);
+                            });
+                        }
+                    },
+                    function (e) {
+                        $scope.$apply(function () {
+                            fileDesc.progress = 100;
+                            fileDesc.status = FileStatus.FINISHED;
+                        });
+                    });
             }
         });
     };
 
+    $scope.addMock = function () {
+        $scope.$apply(function () {
+            $scope.uploadFileList.push({name:'file.name', status:FileStatus.SELECTED});
+            console.log('addMock');
+        });
+    };
+
     $scope.onDrop = function (file) {
-        $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
-        $scope.$digest();
+        $scope.$apply(function () {
+            $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
+        });
     };
 }
 
