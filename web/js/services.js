@@ -1,6 +1,6 @@
 gambitModule.value('channelsInit', {
     'fileStore.uploaded':function (message) {
-        availableFiles.push(message.fileName);
+        //availableFiles.push(message.fileName);
         console.log('added ' + message.fileName);
     }
 });
@@ -48,16 +48,25 @@ gambitModule.factory('eventbus', function (channelsInit) {
 
 gambitModule.factory('uploader', function () {
     return {
+        fileQueue:[],
+        uploadInProgress:false,
         send:function (fileDesc, initCallback, progressCallback, endCallback) {
-            var xhr = new XMLHttpRequest();
+            if (!this.uploadInProgress) {
+                this.fileQueue.push(fileDesc);
+            } else {
+                this.uploadInProgress = true;
 
-            xhr.upload.addEventListener('progress', progressCallback, false);
-            xhr.upload.addEventListener('load', endCallback, false);
+                var xhr = new XMLHttpRequest();
 
-            initCallback();
+                xhr.upload.addEventListener('progress', progressCallback, false);
+                
+                xhr.upload.addEventListener('load', endCallback, false);
 
-            xhr.open("PUT", "/upload?filename=" + fileDesc.name);
-            xhr.send(fileDesc.file);
+                initCallback();
+
+                xhr.open("PUT", "/upload?filename=" + fileDesc.name);
+                xhr.send(fileDesc.file);
+            }
         }
     };
 });

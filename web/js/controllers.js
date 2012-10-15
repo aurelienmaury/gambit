@@ -28,29 +28,43 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
         uploadFileList.splice(index, 1);
     };
 
+
+    $scope.refresh = function () {
+        if (!$scope.refreshTimer) {
+            $scope.refreshTimer = setTimeout(function () {
+                $scope.$apply();
+                console.log('refreshTimer done');
+                $scope.refreshTimer = null;
+            }, 700);
+            console.log('refreshTimer set');
+        }
+    }
+
+
     $scope.sendAll = function () {
         angular.forEach($scope.uploadFileList, function (fileDesc) {
             if (fileDesc.status == FileStatus.SELECTED) {
                 uploader.send(fileDesc,
+                    // init callback
                     function () {
-                        $scope.$apply(function () {
-                            fileDesc.progress = 0;
-                            fileDesc.status = FileStatus.UPLOADING;
-                        });
+                        fileDesc.progress = 0;
+                        fileDesc.status = FileStatus.UPLOADING;
+                        $scope.refresh();
                     },
+                    // progress callback
                     function (e) {
                         if (e.lengthComputable) {
-                            $scope.$apply(function () {
+
                                 fileDesc.progress = Math.round((e.loaded * 100) / e.total);
-                                console.log('progress ' + fileDesc.name + ' ' + fileDesc.progress);
-                            });
+                            $scope.refresh();
                         }
                     },
+                    // end callback
                     function (e) {
-                        $scope.$apply(function () {
+
                             fileDesc.progress = 100;
                             fileDesc.status = FileStatus.FINISHED;
-                        });
+                        $scope.refresh();
                     });
             }
         });
