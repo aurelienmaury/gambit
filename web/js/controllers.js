@@ -33,41 +33,16 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
         if (!$scope.refreshTimer) {
             $scope.refreshTimer = setTimeout(function () {
                 $scope.$apply();
-                console.log('refreshTimer done');
                 $scope.refreshTimer = null;
-            }, 700);
-            console.log('refreshTimer set');
+            }, 500);
         }
     }
 
 
     $scope.sendAll = function () {
-        angular.forEach($scope.uploadFileList, function (fileDesc) {
-            if (fileDesc.status == FileStatus.SELECTED) {
-                uploader.send(fileDesc,
-                    // init callback
-                    function () {
-                        fileDesc.progress = 0;
-                        fileDesc.status = FileStatus.UPLOADING;
-                        $scope.refresh();
-                    },
-                    // progress callback
-                    function (e) {
-                        if (e.lengthComputable) {
-
-                                fileDesc.progress = Math.round((e.loaded * 100) / e.total);
-                            $scope.refresh();
-                        }
-                    },
-                    // end callback
-                    function (e) {
-
-                            fileDesc.progress = 100;
-                            fileDesc.status = FileStatus.FINISHED;
-                        $scope.refresh();
-                    });
-            }
-        });
+        uploader.send($scope.uploadFileList,
+            // progress callback
+            $scope.refresh, 0);
     };
 
     $scope.addMock = function () {

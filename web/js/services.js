@@ -50,22 +50,32 @@ gambitModule.factory('uploader', function () {
     return {
         fileQueue:[],
         uploadInProgress:false,
-        send:function (fileDesc, initCallback, progressCallback, endCallback) {
-            if (!this.uploadInProgress) {
-                this.fileQueue.push(fileDesc);
-            } else {
+        send:function (fileDescList, refresh, index) {
+            self = this;
+            if (index < fileDescList.length && fileDescList[index].status == FileStatus.SELECTED) {
                 this.uploadInProgress = true;
-
                 var xhr = new XMLHttpRequest();
 
-                xhr.upload.addEventListener('progress', progressCallback, false);
-                
-                xhr.upload.addEventListener('load', endCallback, false);
+                xhr.upload.addEventListener('progress', function (e) {
+                    if (e.lengthComputable) {
+                        fileDescList[index].progress = Math.round((e.loaded * 100) / e.total);
+                        refresh();
+                    }
+                }, false);
 
-                initCallback();
+                xhr.upload.addEventListener('load', function (e) {
+                    fileDescList[index].progress = 100;
+                    fileDescList[index].status = FileStatus.FINISHED;
+                    refresh();
+                    self.send(fileDescList, refresh, ++index);
+                }, false);
 
-                xhr.open("PUT", "/upload?filename=" + fileDesc.name);
-                xhr.send(fileDesc.file);
+                fileDescList[index].progress = 0;
+                fileDescList[index].status = FileStatus.UPLOADING;
+                refresh();
+
+                xhr.open("PUT", "/upload?filename=" + fileDescList[index].name);
+                xhr.send(fileDescList[index].file);
             }
         }
     };
