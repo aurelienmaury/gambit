@@ -31,9 +31,7 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
     $scope.sendAll = function () {
         angular.forEach($scope.uploadFileList, function (fileDesc) {
             if (fileDesc.status == FileStatus.SELECTED) {
-                uploader.send(fileDesc, function () {
-                    $scope.$digest()
-                });
+                uploader.send(fileDesc, function () {});
             }
         });
     };
