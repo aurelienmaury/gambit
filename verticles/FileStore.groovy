@@ -29,12 +29,13 @@ fileList = fileList.sort { fileName ->
  */
 // WARN : the reply should be of the same type as the message body.
 bus.registerHandler('fileStore.list') { message ->
+  println "'fileStore.list' called"
   message.reply([files: fileList])
 }
 
 bus.registerHandler('fileStore.uploaded') { message ->
   def uploadedFileName = message.body.fileName
-    println "upload received:"+uploadedFileName
+  println "upload received:" + uploadedFileName
   fileList << uploadedFileName
 }
 

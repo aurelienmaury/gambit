@@ -14,10 +14,22 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
     $scope.FileStatus = FileStatus;
 
     $scope.chatHistory = [];
+
+    $scope.refresh = function (scope) {
+        if (!scope.refreshTimer) {
+            scope.refreshTimer = setTimeout(function () {
+                scope.$apply();
+                scope.refreshTimer = null;
+            }, 500);
+        }
+    }
 }
 
 function HomeCtrl($scope, fileStore) {
-
+    fileStore.list(function (reply) {
+        $scope.availableFiles = reply;
+        $scope.refresh($scope);
+    });
 }
 
 function UploadCtrl($scope, $location, uploader, uploadFileList) {
@@ -45,11 +57,8 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
             $scope.refresh, 0);
     };
 
-    $scope.addMock = function () {
-        $scope.$apply(function () {
-            $scope.uploadFileList.push({name:'file.name', status:FileStatus.SELECTED});
-            console.log('addMock');
-        });
+    $scope.clear = function () {
+        $scope.uploadFileList.push({name:'file.name', status:FileStatus.SELECTED});
     };
 
     $scope.onDrop = function (file) {

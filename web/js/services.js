@@ -1,18 +1,16 @@
-gambitModule.value('channelsInit', {
-    'fileStore.uploaded':function (message) {
-        //availableFiles.push(message.fileName);
-        console.log('added ' + message.fileName);
-    }
-});
+gambitModule.value('channelsInit', {});
 
-gambitModule.value('availableFiles', []);
+gambitModule.value('messageWaitQueue', []);
 
-gambitModule.factory('eventbus', function (channelsInit) {
+gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue) {
     var eb = new vertx.EventBus(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/eventbus');
 
     eb.onopen = function () {
         angular.forEach(channelsInit, function (handler, key) {
             eb.registerHandler(key, handler);
+        });
+        angular.forEach(messageWaitQueue, function(call) {
+            eb.send(call.channel, call.message, call.callback);
         });
     };
 
@@ -34,6 +32,15 @@ gambitModule.factory('eventbus', function (channelsInit) {
                     self.bus.publish('gambit.chat', {message:chatMessage, nick:self.nick});
                 }
             }
+        },
+        send:function (channel, message, callback) {
+            var self = this;
+            if (self.bus.readyState == vertx.EventBus.OPEN) {
+                this.bus.send(channel, message, callback);
+            } else {
+                messageWaitQueue.push({channel:channel, message:message, callback:callback});
+            }
+
         },
         handle:function (channel, handler) {
             var self = this;
@@ -83,11 +90,24 @@ gambitModule.factory('uploader', function () {
 
 gambitModule.factory('fileStore', function (eventbus) {
 
-    return {
+    var self = {
+        completeList:[],
         list:function (callback) {
-            eventbus.send('fileStore.list', {}, function (reply) {
-                callback(reply);
-            });
+            var self = this;
+            if (self.completeList.length > 0) {
+                callback(self.completeList);
+            } else {
+                eventbus.send('fileStore.list', {}, function (reply) {
+                    self.completeList = reply.files;
+                    callback(self.completeList);
+                });
+            }
         }
     };
+
+    eventbus.handle('fileStore.uploaded', function (message) {
+        self.completeList.push(message.fileName);
+    });
+
+    return self;
 });
