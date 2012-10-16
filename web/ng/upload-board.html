@@ -14,7 +14,7 @@
 	        </div>
 
 			<ul class="nav nav-tabs nav-stacked">
-			  <li ng-repeat="file in uploadFileList">
+			  <li ng-repeat="file in uploadFileList | limitTo:5">
 				<uploadfile file="file" index="$index"/>
 			  </li>
 			</ul>

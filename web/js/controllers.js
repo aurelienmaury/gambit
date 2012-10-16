@@ -14,6 +14,7 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
     $scope.FileStatus = FileStatus;
 
     $scope.chatHistory = [];
+    $scope.availableFiles = [];
 
     $scope.refresh = function (scope) {
         if (!scope.refreshTimer) {
@@ -71,12 +72,14 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
 function ContactCtrl($scope, eventbus, channelsInit) {
 
     $scope.chatInput = '';
-    $scope.nick = eventbus.nick;
+    eventbus.getNick(function(nick) {
+        $scope.nick = nick;
+        $scope.refresh($scope);
+    });
 
     eventbus.handle('gambit.chat', function (evt) {
-        $scope.$apply(function () {
-            $scope.chatHistory.push({txt:evt.message, nick:evt.nick});
-        });
+        $scope.chatHistory.push({txt:evt.message, nick:evt.nick});
+        $scope.refresh($scope);
     });
 
     $scope.send = function () {

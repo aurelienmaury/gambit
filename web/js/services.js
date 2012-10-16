@@ -20,17 +20,23 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue) {
             return b = Math.random() * 16, (a == 'y' ? b & 3 | 8 : b | 0).toString(16)
         }),
         nick:null,
+        getNick:function(callback) {
+            var self = this;
+            if (!self.nick) {
+                self.send('nicks.get', {uuid:this.uuid}, function (reply) {
+                    self.nick = reply.nick;
+                    callback(self.nick);
+                });
+            } else {
+                callback(self.nick);
+            }
+        },
         sendChat:function (chatMessage) {
             if (chatMessage.length > 0) {
                 var self = this;
-                if (!self.nick) {
-                    self.bus.send('nicks.get', {uuid:this.uuid}, function (reply) {
-                        self.nick = reply.nick;
-                        self.bus.publish('gambit.chat', {message:chatMessage, nick:self.nick});
-                    });
-                } else {
-                    self.bus.publish('gambit.chat', {message:chatMessage, nick:self.nick});
-                }
+                self.getNick(function(nick) {
+                    self.bus.publish('gambit.chat', {message:chatMessage, nick:nick});
+                });
             }
         },
         send:function (channel, message, callback) {
