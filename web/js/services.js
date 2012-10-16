@@ -41,7 +41,7 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue) {
         },
         send:function (channel, message, callback) {
             var self = this;
-            if (self.bus.readyState == vertx.EventBus.OPEN) {
+            if (self.bus.readyState() == vertx.EventBus.OPEN) {
                 this.bus.send(channel, message, callback);
             } else {
                 messageWaitQueue.push({channel:channel, message:message, callback:callback});
