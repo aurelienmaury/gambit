@@ -2,13 +2,19 @@ gambitModule.value('channelsInit', {});
 
 gambitModule.value('messageWaitQueue', []);
 
-gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue) {
+gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $rootScope, chatHistory) {
     var eb = new vertx.EventBus(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/eventbus');
 
     eb.onopen = function () {
         angular.forEach(channelsInit, function (handler, key) {
             eb.registerHandler(key, handler);
         });
+
+        eb.registerHandler('gambit.chat', function (evt) {
+            chatHistory.push({txt:evt.message, nick:evt.nick});
+            $rootScope.$broadcast('MyEvent');
+        });
+
         angular.forEach(messageWaitQueue, function(call) {
             eb.send(call.channel, call.message, call.callback);
         });

@@ -151,4 +151,8 @@ vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outbound
  */
 server.listen(conf.port, conf.host)
 
+long timerID = vertx.setPeriodic(3000) { timerId ->
+    bus.publish('gambit.chat', [message:"truc ${timerId}", nick:'timer'])
+}
+
 println "Listening ${conf.host}:${conf.port} - filestore is ${conf.fileStore} ..."
