@@ -34,7 +34,7 @@ function HomeCtrl($scope, fileStore) {
     });
 }
 
-function UploadCtrl($scope, $location, uploader, uploadFileList) {
+function UploadCtrl($rootScope, $scope, $location, uploader, uploadFileList) {
 
     $scope.uploadFileList = uploadFileList;
 
@@ -42,25 +42,15 @@ function UploadCtrl($scope, $location, uploader, uploadFileList) {
         uploadFileList.splice(index, 1);
     };
 
-
-    $scope.refresh = function () {
-        if (!$scope.refreshTimer) {
-            $scope.refreshTimer = setTimeout(function () {
-                $scope.$apply();
-                $scope.refreshTimer = null;
-            }, 500);
-        }
-    }
-
-
     $scope.sendAll = function () {
-        uploader.send($scope.uploadFileList,
-            // progress callback
-            $scope.refresh, 0);
+        uploader.send($scope.uploadFileList, 0);
     };
 
     $scope.clear = function () {
-        $scope.uploadFileList.push({name:'file.name', status:FileStatus.SELECTED});
+        uploadFileList = uploadFileList.filter(function (fileDesc) {
+            return fileDesc.status == FileStatus.UPLOADING || fileDesc.status == FileStatus.SELECTED;
+        });
+        $scope.uploadFileList = uploadFileList;
     };
 
     $scope.onDrop = function (file) {
@@ -74,13 +64,17 @@ function ContactCtrl($scope, eventbus, channelsInit, chatHistory) {
 
     $scope.chatHistory = chatHistory;
     $scope.chatInput = '';
-    eventbus.getNick(function(nick) {
-        $scope.nick = nick;
-        $scope.refresh($scope);
+
+    eventbus.getNick(function (nick) {
+        $scope.$apply(function () {
+            $scope.nick = nick;
+        });
     });
 
-    $scope.$on('MyEvent', function() {
-        $scope.$apply();
+    $scope.$on('gambit.chat', function (angEvt, evt) {
+        $scope.$apply(function () {
+            chatHistory.push({txt:evt.message, nick:evt.nick});
+        });
     });
 
     $scope.send = function () {

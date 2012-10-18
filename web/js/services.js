@@ -11,11 +11,10 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
         });
 
         eb.registerHandler('gambit.chat', function (evt) {
-            chatHistory.push({txt:evt.message, nick:evt.nick});
-            $rootScope.$broadcast('MyEvent');
+            $rootScope.$broadcast('gambit.chat', evt);
         });
 
-        angular.forEach(messageWaitQueue, function(call) {
+        angular.forEach(messageWaitQueue, function (call) {
             eb.send(call.channel, call.message, call.callback);
         });
     };
@@ -26,7 +25,7 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
             return b = Math.random() * 16, (a == 'y' ? b & 3 | 8 : b | 0).toString(16)
         }),
         nick:null,
-        getNick:function(callback) {
+        getNick:function (callback) {
             var self = this;
             if (!self.nick) {
                 self.send('nicks.get', {uuid:this.uuid}, function (reply) {
@@ -40,7 +39,7 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
         sendChat:function (chatMessage) {
             if (chatMessage.length > 0) {
                 var self = this;
-                self.getNick(function(nick) {
+                self.getNick(function (nick) {
                     self.bus.publish('gambit.chat', {message:chatMessage, nick:nick});
                 });
             }
@@ -65,11 +64,11 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
     };
 });
 
-gambitModule.factory('uploader', function () {
+gambitModule.factory('uploader', function ($rootScope, uploadFileList) {
     return {
         fileQueue:[],
         uploadInProgress:false,
-        send:function (fileDescList, refresh, index) {
+        send:function (fileDescList, index) {
             self = this;
             if (index < fileDescList.length && fileDescList[index].status == FileStatus.SELECTED) {
                 this.uploadInProgress = true;
@@ -77,21 +76,33 @@ gambitModule.factory('uploader', function () {
 
                 xhr.upload.addEventListener('progress', function (e) {
                     if (e.lengthComputable) {
-                        fileDescList[index].progress = Math.round((e.loaded * 100) / e.total);
-                        refresh();
+                        var progress = Math.round((e.loaded * 100) / e.total);
+                        $rootScope.$apply(function () {
+
+                            uploadFileList[index].progress = progress;
+                            if (progress == 100) {
+                                uploadFileList[index].status = FileStatus.FINISHED;
+                            }
+                        });
+
+                        if (progress == 100) {
+                            self.send(fileDescList, ++index);
+                        }
                     }
                 }, false);
-
+/*
                 xhr.upload.addEventListener('load', function (e) {
-                    fileDescList[index].progress = 100;
-                    fileDescList[index].status = FileStatus.FINISHED;
-                    refresh();
-                    self.send(fileDescList, refresh, ++index);
+                    $rootScope.$apply(function () {
+                        uploadFileList[index].progress = 100;
+                        uploadFileList[index].status = FileStatus.FINISHED;
+                    });
+                    self.send(fileDescList, ++index);
                 }, false);
-
-                fileDescList[index].progress = 0;
-                fileDescList[index].status = FileStatus.UPLOADING;
-                refresh();
+*/
+                //$rootScope.$apply(function () {
+                    uploadFileList[index].progress = 0;
+                    uploadFileList[index].status = FileStatus.UPLOADING;
+                //});
 
                 xhr.open("PUT", "/upload?filename=" + fileDescList[index].name);
                 xhr.send(fileDescList[index].file);
