@@ -10,17 +10,16 @@
 
 			<div class="btn-toolbar">
 	            <button ng-click="sendAll()" class="btn btn-info">Send all</button>
-	            <button ng-click="clear()" class="btn btn-warning pull-right">Clear</button>
 	        </div>
 
 			<ul class="nav nav-tabs nav-stacked">
-			  <li ng-repeat="file in uploadFileList | limitTo:5">
+			  <li ng-repeat="file in uploadFileList">
 				<uploadfile file="file" index="$index"/>
 			  </li>
 			</ul>
 		</div>
 		<div class="span6">			
-			<uploadbox on-drop="onDrop(file)" monlien="addMock()"/>
+			<uploadbox on-drop="onDrop(file)"/>
 		</div>
 	</div>
 

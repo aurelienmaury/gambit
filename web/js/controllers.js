@@ -8,7 +8,7 @@ gambitModule.value('uploadFileList', []);
 gambitModule.value('chatHistory', []);
 
 
-function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
+function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus) {
 
     $scope.$route = $route;
     $scope.$location = $location;
@@ -17,13 +17,18 @@ function RootCtrl($scope, $route, $routeParams, $location, eventbus) {
 
     $scope.availableFiles = [];
 
-    $scope.refresh = function (scope) {
-        if (!scope.refreshTimer) {
-            scope.refreshTimer = setTimeout(function () {
-                scope.$apply();
-                scope.refreshTimer = null;
-            }, 200);
+    $rootScope.refresh = function () {
+        if (!$rootScope.$$phase) {
+            $rootScope.$apply();
+        } else {
+            if (!$rootScope.refreshTimer) {
+                $rootScope.refreshTimer = setTimeout(function () {
+                    $rootScope.refresh();
+                    $rootScope.refreshTimer = null;
+                }, 500);
+            }
         }
+
     }
 }
 
@@ -46,21 +51,13 @@ function UploadCtrl($rootScope, $scope, $location, uploader, uploadFileList) {
         uploader.send($scope.uploadFileList, 0);
     };
 
-    $scope.clear = function () {
-        uploadFileList = uploadFileList.filter(function (fileDesc) {
-            return fileDesc.status == FileStatus.UPLOADING || fileDesc.status == FileStatus.SELECTED;
-        });
-        $scope.uploadFileList = uploadFileList;
-    };
-
     $scope.onDrop = function (file) {
-        $scope.$apply(function () {
-            $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
-        });
+        uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
+        $rootScope.refresh();
     };
 }
 
-function ContactCtrl($scope, eventbus, channelsInit, chatHistory) {
+function ContactCtrl($rootScope, $scope, eventbus, channelsInit, chatHistory) {
 
     $scope.chatHistory = chatHistory;
     $scope.chatInput = '';
@@ -72,9 +69,8 @@ function ContactCtrl($scope, eventbus, channelsInit, chatHistory) {
     });
 
     $scope.$on('gambit.chat', function (angEvt, evt) {
-        $scope.$apply(function () {
-            chatHistory.push({txt:evt.message, nick:evt.nick});
-        });
+        chatHistory.push({txt:evt.message, nick:evt.nick});
+        $rootScope.refresh();
     });
 
     $scope.send = function () {

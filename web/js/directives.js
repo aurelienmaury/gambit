@@ -3,7 +3,7 @@ gambitModule.directive('uploadbox', function () {
         restrict:'E',
         replace:true,
         transclude:true,
-        scope:{onDrop:'&', monlien:'&'},
+        scope:{onDrop:'&'},
         templateUrl:'ng/directives/uploadbox.html',
         link:function (scope, element, attrs) {
 
@@ -27,14 +27,6 @@ gambitModule.directive('uploadbox', function () {
             element.bind('dragenter', behaviorOnOver);
             element.bind('dragleave', behaviorOnOut);
 
-            element.bind('click', function (e) {
-                e.stopPropagation();
-                e.preventDefault();
-
-                scope.monlien();
-
-            });
-
             element.bind('drop', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -45,8 +37,6 @@ gambitModule.directive('uploadbox', function () {
                     scope.onDrop({file:droppedFile});
                 });
             });
-
-
         }
     }
 });

@@ -64,48 +64,45 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
     };
 });
 
-gambitModule.factory('uploader', function ($rootScope, uploadFileList) {
+gambitModule.factory('uploader', function ($rootScope) {
     return {
         fileQueue:[],
         uploadInProgress:false,
         send:function (fileDescList, index) {
             self = this;
-            if (index < fileDescList.length && fileDescList[index].status == FileStatus.SELECTED) {
-                this.uploadInProgress = true;
-                var xhr = new XMLHttpRequest();
+            if (index < fileDescList.length) {
+                if (fileDescList[index].status == FileStatus.SELECTED) {
 
-                xhr.upload.addEventListener('progress', function (e) {
-                    if (e.lengthComputable) {
-                        var progress = Math.round((e.loaded * 100) / e.total);
-                        $rootScope.$apply(function () {
+                    this.uploadInProgress = true;
+                    var xhr = new XMLHttpRequest();
 
-                            uploadFileList[index].progress = progress;
+                    xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var progress = Math.round((e.loaded * 100) / e.total);
+
+                            fileDescList[index].progress = progress;
                             if (progress == 100) {
-                                uploadFileList[index].status = FileStatus.FINISHED;
+                                fileDescList[index].status = FileStatus.FINISHED;
                             }
-                        });
 
-                        if (progress == 100) {
-                            self.send(fileDescList, ++index);
+                            if (progress == 100) {
+                                self.send(fileDescList, ++index);
+                                self.uploadInProgress = false;
+                            }
+                            $rootScope.refresh();
                         }
-                    }
-                }, false);
-/*
-                xhr.upload.addEventListener('load', function (e) {
-                    $rootScope.$apply(function () {
-                        uploadFileList[index].progress = 100;
-                        uploadFileList[index].status = FileStatus.FINISHED;
-                    });
-                    self.send(fileDescList, ++index);
-                }, false);
-*/
-                //$rootScope.$apply(function () {
-                    uploadFileList[index].progress = 0;
-                    uploadFileList[index].status = FileStatus.UPLOADING;
-                //});
+                    }, false);
 
-                xhr.open("PUT", "/upload?filename=" + fileDescList[index].name);
-                xhr.send(fileDescList[index].file);
+                    fileDescList[index].progress = 0;
+                    fileDescList[index].status = FileStatus.UPLOADING;
+
+                    xhr.open("PUT", "/upload?filename=" + fileDescList[index].name);
+                    xhr.send(fileDescList[index].file);
+                } else {
+                    self.send(fileDescList, ++index);
+                }
+            } else {
+                return;
             }
         }
     };

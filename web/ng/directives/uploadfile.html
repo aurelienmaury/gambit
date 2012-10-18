@@ -1,13 +1,12 @@
 <div>
+    <span ng-show="file.status == FileStatus.FINISHED" class="label label-success">done</span>
 
-<span class="">{{file.name}}</span>
+    {{file.name}}
 
-<button ng-click="removeFile($index)" ng-hide="file.status == FileStatus.UPLOADING" type="button" class="close">×</button>
+    <button ng-click="removeFile($index)" ng-hide="file.status == FileStatus.UPLOADING" type="button" class="close">×
+    </button>
 
-<span ng-show="file.status == FileStatus.FINISHED" class="label label-success">done</span>
-
-<div ng-show="file.status == FileStatus.UPLOADING" class="progress progress-info">
-  <div class="bar" style="width: {{file.progress}}%"></div>
-</div>
-
+    <div ng-show="file.status == FileStatus.UPLOADING" class="progress progress-info">
+        <div class="bar" style="width: {{file.progress}}%"></div>
+    </div>
 </div>
