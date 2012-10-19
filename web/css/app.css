@@ -48,7 +48,7 @@ body {
 	overflow-x: hidden;
 }
 .chatArea {
-	min-height:300px;
+	height:300px;
 	overflow: auto;
 }
 
@@ -61,8 +61,9 @@ body {
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
-	padding: 14px;
-	
+	padding-top: 10px;
+	padding-bottom: 10px;
+
 }
 
 form.chat {
@@ -105,4 +106,8 @@ ul.nav-stacked > li:last-child {
 	-moz-border-radius-bottomright: 4px;
 	-moz-border-radius-bottomleft: 4px;
 	border-bottom-color: #DDD;
+}
+
+input.search-query {
+    margin-bottom:15px;
 }

@@ -2,35 +2,17 @@
     <h1>Search</h1>
     <h5>All you can eat, maybe more.</h5>
     <hr/>
-    <div class="row column-header">
-        <div class="span4 home-top-title">
-            <div class="title">Top 5 (10 days)</div>
-        </div>
-        <div class="span4 home-top-title">
-            <div class="title">Top 5 (all time)</div>
-        </div>
-        <div class="span4 home-top-title">
-            <div class="title">New</div>
+
+
+    <div class="row">
+        <div class="span8">
+            <input type="text" ng-model="searchInput" class="search-query input-xxlarge">
         </div>
     </div>
     <div class="row">
-        <div class="span4 span-grey">
-            <ul>
-                <li ng-repeat="file in availableFiles | limitTo:5">{{file}}</li>
-            </ul>
-        </div>
-        <div class="span4 span-grey">
-            <ul>
-                <li>file</li>
-                <li>file</li>
-                <li>file</li>
-            </ul>
-        </div>
-        <div class="span4 span-grey">
-            <ul>
-                <li>file</li>
-                <li>file</li>
-                <li>file</li>
+        <div class="span8 span-grey">
+            <ul class="nav nav-stacked">
+                <li ng-repeat="file in availableFiles">{{file}}</li>
             </ul>
         </div>
     </div>
