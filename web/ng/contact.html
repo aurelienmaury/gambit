@@ -1,21 +1,24 @@
-<div class="row" ng-controller="ContactCtrl">
+<div ng-controller="ContactCtrl">
 
-	<div class="span12">
-		<h1>Contact</h1>
-		<p>You talk as {{nick}}</p>
-	</div>
-	
-	<div class="span12 bordered chatArea">
-		<div ng-repeat="line in chatHistory">
-			{{line.nick}} - {{line.txt}}
-		</div>
-	</div>
 
-	<form class="form-search chat" ng-submit="send()">
-  		<div class="input-append">
-    		<input type="text" ng-model="chatInput" class="search-query input-xxlarge">
-    		<input type="submit" class="btn">Say</input>
-  		</div>
-	</form>
-	
+    <h1>Contact</h1>
+    <h5>Because networking is everything.</h5>
+
+    <hr/>
+    <p>You talk as {{nick}}</p>
+
+    <div class="row">
+        <div class="span12 bordered chatArea">
+            <div ng-repeat="line in chatHistory">
+                {{line.nick}} - {{line.txt}}
+            </div>
+        </div>
+
+        <form class="form-search chat" ng-submit="send()">
+            <div class="input-append">
+                <input type="text" ng-model="chatInput" class="search-query input-xxlarge">
+                <input type="submit" class="btn">Say</input>
+            </div>
+        </form>
+    </div>
 </div>

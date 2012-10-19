@@ -5,6 +5,7 @@ var gambitModule = angular.module('gambit', [], function ($routeProvider, $locat
     $routeProvider.when('/', { templateUrl:'ng/home.html' });
     $routeProvider.when('/upload-board', { templateUrl:'ng/upload-board.html' });
     $routeProvider.when('/contact', { templateUrl:'ng/contact.html' });
+    $routeProvider.when('/search', { templateUrl:'ng/search.html' });
     $routeProvider.otherwise({redirectTo:'/'});
 
     $locationProvider.html5Mode(true);

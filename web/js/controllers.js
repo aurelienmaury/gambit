@@ -39,6 +39,13 @@ function HomeCtrl($scope, fileStore) {
     });
 }
 
+function SearchCtrl($scope, fileStore) {
+    fileStore.list(function (reply) {
+        $scope.availableFiles = reply;
+        $scope.refresh($scope);
+    });
+}
+
 function UploadCtrl($rootScope, $scope, $location, uploader, uploadFileList) {
 
     $scope.uploadFileList = uploadFileList;

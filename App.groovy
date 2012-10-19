@@ -18,7 +18,7 @@ def server = vertx.createHttpServer()
 def conf = [
     host: container.config['host'] ?: '0.0.0.0',
     port: container.config['port'] ?: 8081,
-    spiEntries: ['/', '/upload-board', '/contact'],
+    spiEntries: ['/', '/upload-board', '/contact', '/search'],
     fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator
 ]
 
