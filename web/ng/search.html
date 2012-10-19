@@ -12,9 +12,11 @@
         <div class="span8 span-grey">
             <ul class="nav nav-stacked">
                 <li ng-repeat="file in availableFiles | filter:searchInput">
-                    <a class="fileStore" href="/store?filePath={{file.path}}" target="_blank">
+                    <a class="fileStore"
+                       href="/store?filePath={{file.path}}"
+                       target="_self">
                         <i class="icon-download"></i>
-                        </a>
+                    </a>
                     {{file.name}}
 
 

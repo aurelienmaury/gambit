@@ -56,6 +56,8 @@ def simpleRestRoutes = [
       def targetFile = new File(targetStaticFilePath)
 
       if (targetFile.exists() && targetFile.isFile()) {
+
+        req.response.headers['Content-Disposition'] = 'attachment; filename="' + targetFile.name + '"'
         req.response.sendFile(targetStaticFilePath)
       } else {
         req.response.statusCode = 404
@@ -108,7 +110,7 @@ routeMatcher.noMatch { req ->
       if (targetFile.isDirectory()) {
         req.response.statusCode = 303
         boolean isSeparator = req.path.endsWith('/')
-        req.response.headers['Location'] = req.path + (isSeparator ? '':'/') + defaultIndex
+        req.response.headers['Location'] = req.path + (isSeparator ? '' : '/') + defaultIndex
         req.response.end()
       } else {
         req.response.sendFile(targetStaticFilePath)
