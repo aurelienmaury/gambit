@@ -111,3 +111,7 @@ ul.nav-stacked > li:last-child {
 input.search-query {
     margin-bottom:15px;
 }
+
+.nav > li > a.fileStore {
+    display: inline;
+}

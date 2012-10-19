@@ -50,11 +50,15 @@ def simpleRestRoutes = [
         req.resume()
       }
     },
-    'GET->/files': { req ->
-      bus.send('fileStore.list', [:]) { busResponse ->
-        req.response.chunked = true
-        req.response.headers['Content-Type'] = 'application/json'
-        req.response << new JsonBuilder(busResponse.body).toString()
+    'GET->/store': { req ->
+      String targetStaticFilePath = conf.fileStore + req.params.filePath
+      println "trying to get ${targetStaticFilePath}"
+      def targetFile = new File(targetStaticFilePath)
+
+      if (targetFile.exists() && targetFile.isFile()) {
+        req.response.sendFile(targetStaticFilePath)
+      } else {
+        req.response.statusCode = 404
         req.response.end()
       }
     }

@@ -1,3 +1,5 @@
+import sun.security.provider.MD5
+
 // Useful bindings
 def fs = vertx.fileSystem
 def bus = vertx.eventBus
@@ -15,8 +17,11 @@ if (!fileStoreFile.exists() || !fileStoreFile.isDirectory()) {
 
 // Discovering all file in fileStore directory
 fileStoreFile.eachFileRecurse { file ->
-  if (!file.name.startsWith('.')) {
-    fileList << file.absolutePath - fileStore
+  if (!file.name.startsWith('.') && file.isFile()) {
+    fileList << [
+        path: file.absolutePath - fileStore,
+        name: file.name
+    ]
   }
 }
 
