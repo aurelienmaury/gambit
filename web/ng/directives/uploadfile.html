@@ -3,7 +3,13 @@
 
     {{file.name}}
 
-    <button ng-click="removeFile($index)" ng-hide="file.status == FileStatus.UPLOADING" type="button" class="close">×
+    <button ng-click="removeFile($index)"
+            ng-hide="file.status == FileStatus.UPLOADING"
+            type="button"
+            class="close">
+
+        <i class="icon-remove"></i>
+
     </button>
 
     <div ng-show="file.status == FileStatus.UPLOADING" class="progress progress-info">
