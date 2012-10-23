@@ -19,9 +19,7 @@ def conf = [
     host: container.config['host'] ?: '0.0.0.0',
     port: container.config['port'] ?: 8081,
     spiEntries: ['/', '/upload-board', '/contact', '/search'],
-    fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator,
-    foreign: container.config.foreign ?: [],
-    foreignPort: container.config.foreignPort ?: 8082
+    fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator
 ]
 
 /* Constants */
@@ -34,37 +32,31 @@ String rootIndexPage = webRootPrefix + defaultIndex
  */
 def simpleRestRoutes = [
     'PUT->/upload': { req ->
-      req.pause()
-      def fileName = conf.fileStore + req.params.filename
-      def tmpFileName = "${conf.fileStore}${UUID.randomUUID()}.uploading"
-      fs.open(tmpFileName) { asyncRes ->
-        def file = asyncRes.result
-        def pump = createPump(req, file.writeStream)
-        req.endHandler {
-          file.close {
-            fs.move(tmpFileName, fileName) {
-              bus.publish('fileStore.uploaded', [fileName: req.params.filename])
-              req.response.end()
+        req.pause()
+        def fileName = conf.fileStore + req.params.filename
+        def tmpFileName = "${conf.fileStore}${UUID.randomUUID()}.uploading"
+        fs.open(tmpFileName) { asyncRes ->
+            def file = asyncRes.result
+            def pump = createPump(req, file.writeStream)
+            req.endHandler {
+                file.close {
+                    fs.move(tmpFileName, fileName) {
+                        bus.publish('fileStore.uploaded', [fileName: req.params.filename])
+                        req.response.end()
+                    }
+                }
             }
-          }
+            pump.start()
+            req.resume()
         }
-        pump.start()
-        req.resume()
-      }
     },
-    'GET->/store': { req ->
-      String targetStaticFilePath = conf.fileStore + req.params.filePath
-      println "trying to get ${targetStaticFilePath}"
-      def targetFile = new File(targetStaticFilePath)
-
-      if (targetFile.exists() && targetFile.isFile()) {
-
-        req.response.headers['Content-Disposition'] = 'attachment; filename="' + targetFile.name + '"'
-        req.response.sendFile(targetStaticFilePath)
-      } else {
-        req.response.statusCode = 404
-        req.response.end()
-      }
+    'GET->/files': { req ->
+        bus.send('fileStore.list', [:]) { busResponse ->
+            req.response.chunked = true
+            req.response.headers['Content-Type'] = 'application/json'
+            req.response << new JsonBuilder(busResponse.body).toString()
+            req.response.end()
+        }
     }
 ]
 
@@ -73,52 +65,52 @@ def simpleRestRoutes = [
  */
 def routeMatcher = new RouteMatcher()
 simpleRestRoutes.each { route, behavior ->
-  def parts = route.split('->')
-  switch (parts[0]) {
-    case 'PUT':
-      routeMatcher.put(parts[1], behavior)
-      break
-    case 'GET':
-      routeMatcher.get(parts[1], behavior)
-      break
-    case 'POST':
-      routeMatcher.post(parts[1], behavior)
-      break
-    case 'DELETE':
-      routeMatcher.delete(parts[1], behavior)
-      break
-  }
+    def parts = route.split('->')
+    switch (parts[0]) {
+        case 'PUT':
+            routeMatcher.put(parts[1], behavior)
+            break
+        case 'GET':
+            routeMatcher.get(parts[1], behavior)
+            break
+        case 'POST':
+            routeMatcher.post(parts[1], behavior)
+            break
+        case 'DELETE':
+            routeMatcher.delete(parts[1], behavior)
+            break
+    }
 }
 
 // When no route matches, then serve static files.
 routeMatcher.noMatch { req ->
 
-  if (req.path.contains('..')) {
-    // No relative path to ensure target is in the web sandbox.
-    req.response.statusCode = 404
-    req.response.end()
-  } else if (conf.spiEntries.contains(req.path)) {
-    // Every SPI entries leads to serving the root index page.
-    req.response.sendFile(rootIndexPage)
-  } else {
-    // Any other path
-    String targetStaticFilePath = webRootPrefix + req.path
-    def targetFile = new File(targetStaticFilePath)
-
-    if (!targetFile.exists()) {
-      req.response.statusCode = 404
-      req.response.end()
-    } else {
-      if (targetFile.isDirectory()) {
-        req.response.statusCode = 303
-        boolean isSeparator = req.path.endsWith('/')
-        req.response.headers['Location'] = req.path + (isSeparator ? '' : '/') + defaultIndex
+    if (req.path.contains('..')) {
+        // No relative path to ensure target is in the web sandbox.
+        req.response.statusCode = 404
         req.response.end()
-      } else {
-        req.response.sendFile(targetStaticFilePath)
-      }
+    } else if (conf.spiEntries.contains(req.path)) {
+        // Every SPI entries leads to serving the root index page.
+        req.response.sendFile(rootIndexPage)
+    } else {
+        // Any other path
+        String targetStaticFilePath = webRootPrefix + req.path
+        def targetFile = new File(targetStaticFilePath)
+
+        if (!targetFile.exists()) {
+            req.response.statusCode = 404
+            req.response.end()
+        } else {
+            if (targetFile.isDirectory()) {
+                req.response.statusCode = 303
+                boolean isSeparator = req.path.endsWith('/')
+                req.response.headers['Location'] = req.path + (isSeparator ? '' : '/') + defaultIndex
+                req.response.end()
+            } else {
+                req.response.sendFile(targetStaticFilePath)
+            }
+        }
     }
-  }
 }
 
 // Linking routeMatcher with server.
@@ -129,7 +121,22 @@ server.requestHandler(routeMatcher.asClosure())
  */
 container.deployVerticle('verticles/Nicks.groovy', conf)
 container.deployVerticle('verticles/FileStore.groovy', conf)
-container.deployVerticle('verticles/StarGate.groovy', conf)
+
+/**
+ * Configuration :
+ *
+ * 'address': The main address for the busmod. Optional field. Default value is vertx.basicauthmanager
+ * 'user_collection': The MongoDB collection in which to search for usernames and passwords. Optional field. Default value is users.
+ * 'persistor_address': Address of the persistor busmod to use for usernames and passwords. This field is optional. Default value is vertx.mongopersistor.
+ * 'session_timeout': Timeout of a session, in milliseconds. This field is optional. Default value is 1800000 (30 minutes).
+ *
+ */
+container.deployModule('vertx.auth-mgr-v1.0', [
+    address: 'gambit.auth',
+    user_collection: 'users',
+    persistor_address: 'gambit.userStore',
+    session_timeout: 1800000
+])
 
 /**
  * SockJS bridge configuration.
@@ -139,15 +146,17 @@ def sockJsConfig = [
 ]
 
 def inboundPermitted = [
-    ['address': 'gambit.chat'],
-    ['address': 'nicks.get'],
-    ['address': 'fileStore.list']
+    [address: 'gambit.chat'],
+    [address: 'nicks.get'],
+    [address: 'fileStore.list'],
+
+    [address: 'vertx.basicauthmanager.login']
 ]
 def outboundPermitted = [
-    ['address': 'gambit.chat'],
-    ['address': 'nicks.get'],
-    ['address': 'fileStore.list'],
-    ['address': 'fileStore.uploaded']
+    [address: 'gambit.chat'],
+    [address: 'nicks.get'],
+    [address: 'fileStore.list'],
+    [address: 'fileStore.uploaded']
 ]
 
 /**
