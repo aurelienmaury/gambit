@@ -1,4 +1,9 @@
 {
     "port": 8081,
-    "fileStore": "/Users/amaury/gambitBox"
+    "host": "127.0.0.1",
+    "fileStore": "/Users/amaury/gambitBox",
+    "foreignPort": 8082,
+    "foreign": [
+        {"host": "127.0.0.2", "port": 8082}
+    ]
 }

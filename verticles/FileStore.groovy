@@ -36,12 +36,14 @@ fileList = fileList.sort { fileName ->
 bus.registerHandler('fileStore.list') { message ->
   println "'fileStore.list' called"
   message.reply([files: fileList])
+  bus.send('sg.fileStore.list', [action: 'list', source: 'webfront'])
 }
 
 bus.registerHandler('fileStore.uploaded') { message ->
   def uploadedFileName = message.body.fileName
   println "upload received:" + uploadedFileName
   fileList << uploadedFileName
+
 }
 
 /**

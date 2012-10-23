@@ -19,7 +19,9 @@ def conf = [
     host: container.config['host'] ?: '0.0.0.0',
     port: container.config['port'] ?: 8081,
     spiEntries: ['/', '/upload-board', '/contact', '/search'],
-    fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator
+    fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator,
+    foreign: container.config.foreign ?: [],
+    foreignPort: container.config.foreignPort ?: 8082
 ]
 
 /* Constants */
@@ -127,6 +129,7 @@ server.requestHandler(routeMatcher.asClosure())
  */
 container.deployVerticle('verticles/Nicks.groovy', conf)
 container.deployVerticle('verticles/FileStore.groovy', conf)
+container.deployVerticle('verticles/StarGate.groovy', conf)
 
 /**
  * SockJS bridge configuration.
