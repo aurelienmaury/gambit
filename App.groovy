@@ -139,22 +139,6 @@ container.deployModule('vertx.auth-mgr-v1.0', [
 ])
 
 /**
- * Configuration :
- *
- * 'address': The main address for the busmod. Optional field. Default value is vertx.basicauthmanager
- * 'user_collection': The MongoDB collection in which to search for usernames and passwords. Optional field. Default value is users.
- * 'persistor_address': Address of the persistor busmod to use for usernames and passwords. This field is optional. Default value is vertx.mongopersistor.
- * 'session_timeout': Timeout of a session, in milliseconds. This field is optional. Default value is 1800000 (30 minutes).
- *
- */
-container.deployModule('vertx.auth-mgr-v1.0', [
-    address: 'gambit.auth',
-    user_collection: 'users',
-    persistor_address: 'gambit.userStore',
-    session_timeout: 1800000
-])
-
-/**
  * SockJS bridge configuration.
  */
 def sockJsConfig = [
@@ -163,9 +147,8 @@ def sockJsConfig = [
 
 def inboundPermitted = [
     [address: 'gambit.chat'],
-    [address: 'nicks.get'],
-    [address: 'fileStore.list'],
-
+    [address: 'nicks.get', requires_auth: true],
+    [address: 'fileStore.list', requires_auth: true],
     [address: 'vertx.basicauthmanager.login']
 ]
 def outboundPermitted = [
