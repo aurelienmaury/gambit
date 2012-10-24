@@ -121,6 +121,7 @@ server.requestHandler(routeMatcher.asClosure())
  */
 container.deployVerticle('verticles/Nicks.groovy', conf)
 container.deployVerticle('verticles/FileStore.groovy', conf)
+container.deployVerticle('verticles/UserStore.groovy', conf)
 
 /**
  * Configuration :
@@ -149,7 +150,7 @@ def inboundPermitted = [
     [address: 'gambit.chat'],
     [address: 'nicks.get', requires_auth: true],
     [address: 'fileStore.list', requires_auth: true],
-    [address: 'vertx.basicauthmanager.login']
+    [address: 'gambit.auth.login']
 ]
 def outboundPermitted = [
     [address: 'gambit.chat'],

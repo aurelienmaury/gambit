@@ -17,6 +17,12 @@ function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus)
 
     $scope.availableFiles = [];
 
+    $scope.doLogin = function(username, password) {
+        eventbus.login(username, password, function(reply) {
+           console.log('reply is '+reply);
+        });
+    };
+
     $rootScope.refresh = function () {
         if (!$rootScope.$$phase) {
             $rootScope.$apply();
@@ -28,7 +34,6 @@ function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus)
                 }, 500);
             }
         }
-
     }
 }
 

@@ -11,7 +11,7 @@
 
 def bus = vertx.eventBus
 
-bus.registerHandler('gambit.userStore.findone') { message ->
-    println "tried to findone "+message.body
-    message.reply [status: 'ok', result:'jack']
+bus.registerHandler('gambit.userStore') { message ->
+    println "tried to "+message.body
+    message.reply([status: 'ok', result:[:]])
 }
