@@ -1,9 +1,8 @@
 /**
  * Imports
  */
-
+import org.vertx.groovy.core.streams.Pump
 import org.vertx.groovy.core.http.RouteMatcher
-import static org.vertx.groovy.core.streams.Pump.createPump
 import groovy.json.JsonBuilder
 
 // Useful bindings
@@ -37,7 +36,7 @@ def simpleRestRoutes = [
         def tmpFileName = "${conf.fileStore}${UUID.randomUUID()}.uploading"
         fs.open(tmpFileName) { asyncRes ->
             def file = asyncRes.result
-            def pump = createPump(req, file.writeStream)
+            def pump = Pump.createPump(req, file.writeStream)
             req.endHandler {
                 file.close {
                     fs.move(tmpFileName, fileName) {

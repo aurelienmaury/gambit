@@ -52,8 +52,13 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
                 messageWaitQueue.push({channel:channel, message:message, callback:callback});
             }
         },
-        login:function(username, password, callback) {
-            this.send('gambit.auth.login', {username: username, password: password}, callback);
+        login:function (username, password, callback) {
+            var self = this;
+            this.send('gambit.auth.login', {username:username, password:password}, function (reply) {
+                    self.sessionID = reply.sessionID;
+                    callback(reply);
+                }
+            );
         },
         handle:function (channel, handler) {
             var self = this;

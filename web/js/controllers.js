@@ -19,7 +19,7 @@ function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus)
 
     $scope.doLogin = function(username, password) {
         eventbus.login(username, password, function(reply) {
-           console.log('reply is '+reply);
+           console.log('reply is '+reply.sessionID);
         });
     };
 
