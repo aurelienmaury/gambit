@@ -119,9 +119,17 @@ server.requestHandler(routeMatcher.asClosure())
 /**
  * EventBus players deployment.
  */
-container.deployVerticle('verticles/Nicks.groovy', conf)
-container.deployVerticle('verticles/FileStore.groovy', conf)
-container.deployVerticle('verticles/UserStore.groovy', conf)
+container.deployVerticle('verticles/Nicks.groovy', conf, 1) {
+    println "Module Nicks deployed"
+}
+
+container.deployVerticle('verticles/FileStore.groovy', conf, 1) {
+    println "Module FileStore deployed. Pointing to ${conf.fileStore}"
+}
+
+container.deployVerticle('verticles/UserStore.groovy', conf, 1) {
+    println "Module UserStore deployed"
+}
 
 /**
  * Configuration :
@@ -132,7 +140,7 @@ container.deployVerticle('verticles/UserStore.groovy', conf)
  * 'session_timeout': Timeout of a session, in milliseconds. This field is optional. Default value is 1800000 (30 minutes).
  *
  */
-container.deployModule('vertx.auth-mgr-v1.0', [
+container.deployModule('vertx.auth-mgr-v1.1', [
     address: 'gambit.auth',
     user_collection: 'users',
     persistor_address: 'gambit.userStore',
@@ -169,4 +177,4 @@ vertx.createSockJSServer(server).bridge(sockJsConfig, inboundPermitted, outbound
  */
 server.listen(conf.port, conf.host)
 
-println "Listening ${conf.host}:${conf.port} - filestore is ${conf.fileStore} ..."
+println "Listening ${conf.host}:${conf.port} ..."

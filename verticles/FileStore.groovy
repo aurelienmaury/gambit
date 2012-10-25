@@ -1,5 +1,3 @@
-import sun.security.provider.MD5
-
 // Useful bindings
 def fs = vertx.fileSystem
 def bus = vertx.eventBus
@@ -45,8 +43,3 @@ bus.registerHandler('fileStore.uploaded') { message ->
   fileList << uploadedFileName
 
 }
-
-/**
- * Up and running
- */
-println 'FileStore deployed'
