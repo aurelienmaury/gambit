@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="assets/css/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/app.css">
 </head>
 
@@ -17,7 +18,10 @@
     <div class="navbar-inner">
         <div class="container">
 
-            <a class="brand" ng-click="$location.path('/home')">Gambit</a>
+            <a class="brand" ng-click="$location.path('/home')">
+	      <i class="icon-retweet"></i> 
+	      Gambit
+	    </a>
 
             <ul class="nav">
                 <li ng-class="{active: $location.path() == '/'}">
@@ -53,7 +57,7 @@
     <p>AngularJs - Vert.x - Aurelien Maury</p>
 </footer>
 
-<script src="assets/js/angular-1.0.2/angular.js"></script>
+<script src="assets/js/angular-1.0.5/angular.js"></script>
 <script src="assets/js/sockjs-0.3.min.js"></script>
 <script src="assets/js/vertxbus.js"></script>
 

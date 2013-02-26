@@ -1,13 +1,35 @@
 def nicks = [:]
 
-def adjectives = [ 'adorable', 'strong', 'elegant', 'fancy', 'awesome', 'omnipotent', 'ugly', 'big', 'black', 'frigid', 'putrid' ]
+def adjectives = [ 
+    'adorable', 
+    'strong', 
+    'elegant', 
+    'fancy', 
+    'awesome', 
+    'omnipotent', 
+    'ugly', 
+    'big', 
+    'black', 
+    'frigid', 
+    'putrid' 
+]
 
-def nouns = ['vampire','troll','dwarf','samurai','ninja','goblin','ice','blob', 'wind','sword']
-
+def nouns = [
+    'vampire',
+    'troll',
+    'dwarf',
+    'samurai',
+    'ninja',
+    'goblin',
+    'ice',
+    'blob',
+    'wind',
+    'sword'
+]
 
 vertx.eventBus.registerHandler('nicks.get') { message ->
 	def uuid = message.body.uuid
-	
+	println "nicks.get uuid:${uuid}"
 	if (!nicks[uuid]) {
 
 		def newNick = ''
@@ -19,6 +41,7 @@ vertx.eventBus.registerHandler('nicks.get') { message ->
 		}
 
 		nicks[uuid] = newNick
+		println "registered ${uuid} with ${newNick}"
 	}
 
 	message.reply([status:200, nick: nicks[uuid]])

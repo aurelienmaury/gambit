@@ -7,7 +7,6 @@ var FileStatus = {
 gambitModule.value('uploadFileList', []);
 gambitModule.value('chatHistory', []);
 
-
 function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus) {
 
     $scope.$route = $route;
@@ -37,17 +36,15 @@ function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus)
     }
 }
 
-function HomeCtrl($scope, fileStore) {
-    fileStore.list(function (reply) {
-        $scope.availableFiles = reply;
-        $scope.refresh($scope);
+function HomeCtrl($scope, eventbus) {
+    eventbus.send('fileStore.list', {}, function (reply) {
+	$scope.availableFiles = reply.files;
     });
 }
 
-function SearchCtrl($scope, fileStore) {
-    fileStore.list(function (reply) {
-        $scope.availableFiles = reply;
-        $scope.refresh($scope);
+function SearchCtrl($scope, eventbus) {
+    eventbus.send('fileStore.list', {}, function (reply) {
+	$scope.availableFiles = reply.files;
     });
 }
 
@@ -59,17 +56,23 @@ function UploadCtrl($rootScope, $scope, $location, uploader, uploadFileList) {
         uploadFileList.splice(index, 1);
     };
 
-    $scope.sendAll = function () {
-        uploader.send($scope.uploadFileList, 0);
+    $scope.sendAll = function() {
+	uploader.go($scope.uploadFileList, 0, function(index, progress, continueCallback) {
+	    $scope.uploadFileList[index].progress = progress;
+            if (progress == 100) {
+                $scope.uploadFileList[index].status = FileStatus.FINISHED;
+                uploader.go($scope.uploadFileList, ++index, continueCallback);
+            }
+	});
     };
 
     $scope.onDrop = function (file) {
-        uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
+        $scope.uploadFileList.push({name:file.name, status:FileStatus.SELECTED, file:file});
         $rootScope.refresh();
     };
 }
 
-function ContactCtrl($rootScope, $scope, eventbus, channelsInit, chatHistory) {
+function ContactCtrl($rootScope, $scope, eventbus, chatHistory) {
 
     $scope.chatHistory = chatHistory;
     $scope.chatInput = '';

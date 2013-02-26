@@ -13,9 +13,9 @@
             <ul class="nav nav-stacked">
                 <li ng-repeat="file in availableFiles | filter:searchInput">
                     <a class="fileStore"
-                       href="/store?filePath={{file.path}}"
+                       href="/store/{{file.name}}"
                        target="_self">
-                        <i class="icon-download"></i>
+                        <i class="icon-download icon-2x"></i>
                     </a>
                     {{file.name}}
 

@@ -1,71 +1,58 @@
-gambitModule.value('channelsInit', {});
-
-gambitModule.value('messageWaitQueue', []);
-
-gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $rootScope, chatHistory) {
-    var eb = new vertx.EventBus(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/eventbus');
+gambitModule.factory('eventbus', function ($rootScope, chatHistory) {
+    var eb = new vertx.EventBus(window.location.protocol + 
+				'//' + 
+				window.location.hostname + 
+				':' + window.location.port + 
+				'/eventbus');
+    eb.handlersQueue = {};
+    eb.messageQueue = [];
 
     eb.onopen = function () {
-        angular.forEach(channelsInit, function (handler, key) {
-            eb.registerHandler(key, handler);
+	var waitingHandlersSet = 0;
+        angular.forEach(eb.handlersQueue, function (handler, key) {
+	    eb.registerHandler(key, handler);
+	    waitingHandlersSet++;
         });
-
-        eb.registerHandler('gambit.chat', function (evt) {
-            $rootScope.$broadcast('gambit.chat', evt);
+	console.log(waitingHandlersSet + ' waiting handlers set');
+	var waitingMessagesSent = 0;
+        angular.forEach(eb.messageQueue, function (call) {
+	    eb.send(call.channel, call.message, function(reply) {
+		$rootScope.$apply(function() {
+		    if(call.callback) { call.callback(reply); }
+		});
+	    });	    
+	    waitingMessagesSent++;
         });
-
-        angular.forEach(messageWaitQueue, function (call) {
-            eb.send(call.channel, call.message, call.callback);
-        });
+	console.log(waitingMessagesSent+ ' queued messages sent.');
+	console.log('EventBus is fully open');
     };
 
     return {
         bus:eb,
-        uuid:'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (a, b) {
-            return b = Math.random() * 16, (a == 'y' ? b & 3 | 8 : b | 0).toString(16)
-        }),
-        nick:null,
-        getNick:function (callback) {
-            var self = this;
-            if (!self.nick) {
-                self.send('nicks.get', {uuid:this.uuid}, function (reply) {
-                    self.nick = reply.nick;
-                    callback(self.nick);
-                });
-            } else {
-                callback(self.nick);
-            }
-        },
-        sendChat:function (chatMessage) {
-            if (chatMessage.length > 0) {
-                var self = this;
-                self.getNick(function (nick) {
-                    self.bus.publish('gambit.chat', {message:chatMessage, nick:nick});
-                });
-            }
-        },
         send:function (channel, message, callback) {
             var self = this;
             if (self.bus.readyState() == vertx.EventBus.OPEN) {
-                this.bus.send(channel, message, callback);
+		console.log('sending');
+                self.bus.send(channel, message, function(reply) {
+		    $rootScope.$apply(function() {
+			if(callback) { callback(reply);	}
+		    });
+		});
             } else {
-                messageWaitQueue.push({channel:channel, message:message, callback:callback});
+		console.log('queuing message');
+                self.bus.messageQueue.push({channel:channel, message:message, callback:callback});
             }
         },
-        login:function (username, password, callback) {
-            var self = this;
-            this.send('gambit.auth.login', {username:username, password:password}, function (reply) {
-                    self.sessionID = reply.sessionID;
-                    callback(reply);
-                }
-            );
-        },
+
         handle:function (channel, handler) {
             var self = this;
-            if (self.bus.readyState == vertx.EventBus.OPEN) {
-                self.bus.registerHandler(channel, handler);
+            if (self.bus.readyState() == vertx.EventBus.OPEN) {
+		console.log('Registered handler for '+channel);
+                self.bus.registerHandler(channel, function() {
+		    $rootScope.$apply(handler);
+		});
             } else {
-                channelsInit[channel] = handler;
+                self.bus.handlersQueue[channel] = handler;
             }
         }
     };
@@ -73,68 +60,29 @@ gambitModule.factory('eventbus', function (channelsInit, messageWaitQueue, $root
 
 gambitModule.factory('uploader', function ($rootScope) {
     return {
-        fileQueue:[],
-        uploadInProgress:false,
-        send:function (fileDescList, index) {
+        sendFile:function (fileDescList, index, progressCallback) {
+            if (index >= fileDescList.length) { return; }
+
             self = this;
-            if (index < fileDescList.length) {
-                if (fileDescList[index].status == FileStatus.SELECTED) {
+            if (fileDescList[index].status == FileStatus.SELECTED) {
+                var xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function (e) {
+                    if (e.lengthComputable) {
+                        var progress = Math.round((e.loaded * 100) / e.total);
+                        $rootScope.$apply(function() {
+			    progressCallback(index, progress, progressCallback);
+			});
+                    }
+                }, false);
 
-                    this.uploadInProgress = true;
-                    var xhr = new XMLHttpRequest();
+                fileDescList[index].progress = 0;
+                fileDescList[index].status = FileStatus.UPLOADING;
 
-                    xhr.upload.addEventListener('progress', function (e) {
-                        if (e.lengthComputable) {
-                            var progress = Math.round((e.loaded * 100) / e.total);
-
-                            fileDescList[index].progress = progress;
-                            if (progress == 100) {
-                                fileDescList[index].status = FileStatus.FINISHED;
-                            }
-
-                            if (progress == 100) {
-                                self.send(fileDescList, ++index);
-                                self.uploadInProgress = false;
-                            }
-                            $rootScope.refresh();
-                        }
-                    }, false);
-
-                    fileDescList[index].progress = 0;
-                    fileDescList[index].status = FileStatus.UPLOADING;
-
-                    xhr.open("PUT", "/upload?filename=" + fileDescList[index].name);
-                    xhr.send(fileDescList[index].file);
-                } else {
-                    self.send(fileDescList, ++index);
-                }
+                xhr.open('PUT', '/upload?filename=' + fileDescList[index].name);
+                xhr.send(fileDescList[index].file);
             } else {
-                return;
+                self.sendFile(fileDescList, ++index, progressCallback);
             }
         }
     };
-});
-
-gambitModule.factory('fileStore', function (eventbus) {
-
-    var self = {
-        completeList:[],
-        list:function (callback) {
-            var self = this;
-            if (self.completeList.length > 0) {
-                callback(self.completeList);
-            } else {
-                eventbus.send('fileStore.list', {}, function (reply) {
-                    self.completeList = reply.files;
-                    callback(self.completeList);
-                });
-            }
-        }
-    };
-
-    eventbus.handle('fileStore.uploaded', function (message) {
-        self.completeList.push(message.fileName);
-    });
-
-    return self;
 });

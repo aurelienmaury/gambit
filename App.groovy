@@ -1,19 +1,11 @@
-/**
- * Imports
- */
 import org.vertx.groovy.core.streams.Pump
 import org.vertx.groovy.core.http.RouteMatcher
 import groovy.json.JsonBuilder
 
-// Useful bindings
 def fs = vertx.fileSystem
 def bus = vertx.eventBus
-
 def server = vertx.createHttpServer()
 
-/**
- * Configuration
- */
 def conf = [
     host: container.config['host'] ?: '0.0.0.0',
     port: container.config['port'] ?: 8081,
@@ -21,47 +13,51 @@ def conf = [
     fileStore: (container.config['fileStore'] ?: '/tmp') + File.separator
 ]
 
-/* Constants */
 String defaultIndex = 'index.html'
 String webRootPrefix = 'web' + File.separator
 String rootIndexPage = webRootPrefix + defaultIndex
 
-/**
- * REST Routes definition
- */
+// ---------------------------------------------------------------
 def simpleRestRoutes = [
-    'PUT->/upload': { req ->
-        req.pause()
-        def fileName = conf.fileStore + req.params.filename
-        def tmpFileName = "${conf.fileStore}${UUID.randomUUID()}.uploading"
-        fs.open(tmpFileName) { asyncRes ->
-            def file = asyncRes.result
-            def pump = Pump.createPump(req, file.writeStream)
-            req.endHandler {
-                file.close {
-                    fs.move(tmpFileName, fileName) {
-                        bus.publish('fileStore.uploaded', [fileName: req.params.filename])
-                        req.response.end()
-                    }
-                }
-            }
-            pump.start()
-            req.resume()
-        }
-    },
-    'GET->/files': { req ->
-        bus.send('fileStore.list', [:]) { busResponse ->
-            req.response.chunked = true
-            req.response.headers['Content-Type'] = 'application/json'
-            req.response << new JsonBuilder(busResponse.body).toString()
-            req.response.end()
-        }
+
+'PUT->/upload': { req ->
+    req.pause()
+    def fileName = conf.fileStore + req.params.filename
+    def tmpFileName = "${conf.fileStore}${UUID.randomUUID()}.uploading"
+    fs.open(tmpFileName) { asyncRes ->
+	def file = asyncRes.result
+	def pump = Pump.createPump(req, file.writeStream)
+	req.endHandler {
+	    file.close {
+		fs.move(tmpFileName, fileName) {
+		    bus.publish('fileStore.uploaded', [fileName: req.params.filename])
+		    req.response.end()
+		}
+	    }
+	}
+	pump.start()
+	req.resume()
     }
+    },
+
+'GET->/files': { req ->
+    bus.send('fileStore.list', [:]) { busResponse ->
+	req.response.chunked = true
+	req.response.headers['Content-Type'] = 'application/json'
+	req.response << new JsonBuilder(busResponse.body).toString()
+	req.response.end()
+    }
+    },
+    
+'GET->/store/:filename': { req ->
+    
+    def filename = req.params['filename']
+    req.response.sendFile(conf.fileStore + '/' + filename)
+    }
+
 ]
 
-/**
- * REST Routes wiring
- */
+// ---------------------------------------------------------------
 def routeMatcher = new RouteMatcher()
 simpleRestRoutes.each { route, behavior ->
     def parts = route.split('->')
@@ -81,9 +77,8 @@ simpleRestRoutes.each { route, behavior ->
     }
 }
 
-// When no route matches, then serve static files.
+// ---------------------------------------------------------------
 routeMatcher.noMatch { req ->
-
     if (req.path.contains('..')) {
         // No relative path to ensure target is in the web sandbox.
         req.response.statusCode = 404
@@ -156,7 +151,7 @@ def sockJsConfig = [
 def inboundPermitted = [
     [address: 'gambit.chat'],
     [address: 'nicks.get', requires_auth: true],
-    [address: 'fileStore.list', requires_auth: true],
+    [address: 'fileStore.list', requires_auth: false],
     [address: 'gambit.auth.login']
 ]
 def outboundPermitted = [
