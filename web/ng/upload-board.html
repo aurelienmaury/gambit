@@ -1,28 +1,23 @@
 <div ng-controller="UploadCtrl">
+  <h1>Upload Board</h1>
+  <h5>All your data are belong to us.</h5>
+  <hr/>
+  <div class="row">
+    <div class="span6">
 
-	<h1>Upload Board</h1>
-    <h5>All your data are belong to us.</h5>
-    <hr/>
+      <div class="btn-toolbar">
+	<button ng-click="sendAll()" class="btn btn-info">Send all</button>
+      </div>
 
-	<div class="row">
-		<div class="span6">
-			<p>
+      <ul class="nav nav-tabs nav-stacked">
+	<li ng-repeat="file in uploadFileList">
+	  <uploadfile file="file" index="$index"/>
+	</li>
+      </ul>
 
-			</p>
-
-			<div class="btn-toolbar">
-	            <button ng-click="sendAll()" class="btn btn-info">Send all</button>
-	        </div>
-
-			<ul class="nav nav-tabs nav-stacked">
-			  <li ng-repeat="file in uploadFileList">
-				<uploadfile file="file" index="$index"/>
-			  </li>
-			</ul>
-		</div>
-		<div class="span6">			
-			<uploadbox on-drop="onDrop(file)"/>
-		</div>
-	</div>
-
+    </div>
+    <div class="span6">			
+      <uploadbox on-drop="onDrop(file)"/>
+    </div>
+  </div>
 </div>

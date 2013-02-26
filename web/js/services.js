@@ -29,7 +29,7 @@ gambitModule.factory('eventbus', function ($rootScope, chatHistory) {
 
     return {
         bus:eb,
-        send:function (channel, message, callback) {
+        emit:function (channel, message, callback) {
             var self = this;
             if (self.bus.readyState() == vertx.EventBus.OPEN) {
 		console.log('sending');

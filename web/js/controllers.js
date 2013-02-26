@@ -37,13 +37,13 @@ function RootCtrl($rootScope, $scope, $route, $routeParams, $location, eventbus)
 }
 
 function HomeCtrl($scope, eventbus) {
-    eventbus.send('fileStore.list', {}, function (reply) {
+    eventbus.emit('fileStore.list', {}, function (reply) {
 	$scope.availableFiles = reply.files;
     });
 }
 
 function SearchCtrl($scope, eventbus) {
-    eventbus.send('fileStore.list', {}, function (reply) {
+    eventbus.emit('fileStore.list', {}, function (reply) {
 	$scope.availableFiles = reply.files;
     });
 }
